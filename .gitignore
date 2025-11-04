@@ -55,6 +55,18 @@ vcpost.md
 github.md
 vc_rules.md
 
+# Local reports and backups (not for GitHub)
+reports/
+backups/
+*.json
+*_scan*.json
+*_report*.md
+*_SUMMARY*.md
+*OPTIMIZATION*.md
+models_whitelist.json
+models_backup_list.txt
+GITHUB_SYNC_NOTES.md
+
 # OS
 .DS_Store
 Thumbs.db
@@ -81,4 +93,3 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
