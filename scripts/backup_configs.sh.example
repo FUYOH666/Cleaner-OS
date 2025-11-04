@@ -66,3 +66,4 @@ EOF
 echo ""
 echo "✓ Резервная копия создана: $BACKUP_PATH"
 echo "Размер: $(du -sh "$BACKUP_PATH" 2>/dev/null | cut -f1 || echo 'N/A')"
+
