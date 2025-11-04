@@ -10,6 +10,87 @@ from syscleaner.platform.paths import PlatformPaths
 logger = logging.getLogger(__name__)
 
 
+def _should_ignore_file(file_path: Path) -> bool:
+    """
+    Проверить, нужно ли игнорировать файл при проверке безопасности.
+
+    Игнорируются:
+    - Файлы в node_modules, dist, build, .venv, venv
+    - Type stubs (.pyi файлы)
+    - Файлы в расширениях редакторов (.cursor/extensions, .vscode/extensions)
+    - Файлы в кэшах библиотек (Library/Caches/, .cache/)
+    - Файлы в системных директориях приложений
+    - Файлы стандартных библиотек Python (site-packages, lib/python3.*/)
+    - Файлы в системных директориях установщиков (uv, conda, pip)
+
+    Args:
+        file_path: Путь к файлу.
+
+    Returns:
+        True если файл нужно игнорировать, иначе False.
+    """
+    path_str = str(file_path)
+    parts = path_str.split("/")
+
+    # Игнорируем файлы в артефактах сборки и зависимостях
+    ignore_dir_names = {
+        "node_modules",
+        "dist",
+        "build",
+        ".venv",
+        "venv",
+        "__pycache__",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        "egg-info",
+        "site-packages",
+        ".cache",
+    }
+
+    # Игнорируем файлы в расширениях редакторов
+    if ".cursor/extensions" in path_str or ".vscode/extensions" in path_str:
+        return True
+
+    # Игнорируем файлы в кэшах приложений (Cypress, библиотеки)
+    if "/Library/Caches/" in path_str:
+        return True
+
+    # Игнорируем файлы в системных директориях установщиков
+    if "/.local/share/uv/" in path_str or "/.local/share/pip/" in path_str:
+        return True
+    if "/conda/" in path_str and ("site-packages" in path_str or "lib/python" in path_str):
+        return True
+
+    # Игнорируем файлы стандартных библиотек Python
+    if "lib/python" in path_str and ("site-packages" in path_str or "dist-packages" in path_str):
+        return True
+
+    # Игнорируем файлы в документации библиотек (docs, documentation)
+    if "/docs/" in path_str.lower() or "/documentation/" in path_str.lower():
+        return True
+
+    # Игнорируем стандартные файлы библиотек (secrets.py, credentials.py из стандартной библиотеки)
+    if "site-packages" in path_str or "dist-packages" in path_str:
+        return True
+
+    # Игнорируем type stubs (`.pyi` файлы) - это не реальный код с секретами
+    if file_path.suffix == ".pyi":
+        return True
+
+    # Игнорируем заголовочные файлы C/C++ (`.h`, `.hpp`) - это не секреты
+    if file_path.suffix in {".h", ".hpp", ".hxx"}:
+        return True
+
+    # Проверяем, есть ли в пути игнорируемые директории
+    # ВАЖНО: не игнорируем файлы .env в корне проектов разработки
+    for part in parts:
+        if part in ignore_dir_names:
+            return True
+
+    return False
+
+
 class SecurityIssue:
     """Проблема безопасности."""
 
@@ -107,6 +188,10 @@ def check_file_permissions(file_path: Path) -> SecurityIssue | None:
     Returns:
         SecurityIssue если найдена проблема, иначе None.
     """
+    # Игнорируем файлы в артефактах сборки, расширениях и type stubs
+    if _should_ignore_file(file_path):
+        return None
+
     try:
         file_stat = file_path.stat()
         file_mode = stat.filemode(file_stat.st_mode)
@@ -162,6 +247,10 @@ def find_sensitive_files(
                 # Используем rglob для рекурсивного поиска
                 for file_path in search_path.rglob(pattern):
                     if file_path.is_file():
+                        # Игнорируем файлы в артефактах сборки, расширениях и type stubs
+                        if _should_ignore_file(file_path):
+                            continue
+
                         try:
                             size = file_path.stat().st_size
                             found_files.append(
