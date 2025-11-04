@@ -268,7 +268,41 @@ def scan(
     # Предупреждения о безопасности
     if security_results.get("high_severity_issues", 0) > 0:
         console.print("\n[red]⚠️  Найдены критические проблемы безопасности![/red]")
-        console.print("Проверьте раздел безопасности в отчете.\n")
+        console.print("\n[bold]Топ критических проблем:[/bold]\n")
+        
+        # Выводим топ-10 критических проблем
+        high_severity_issues = [
+            issue for issue in security_results.get("issues", [])
+            if issue.get("severity") == "high"
+        ][:10]
+        
+        for idx, issue in enumerate(high_severity_issues, 1):
+            console.print(f"[red]{idx}.[/red] [{issue.get('severity', 'unknown').upper()}] {issue.get('category', 'Unknown')}")
+            console.print(f"    Путь: [dim]{issue.get('path', 'N/A')}[/dim]")
+            console.print(f"    Описание: {issue.get('description', 'N/A')}")
+            
+            # Объяснение критичности
+            category = issue.get('category', '').lower()
+            if 'ssh' in category:
+                console.print(f"    [yellow]⚠️  Почему критично:[/yellow] Неправильные права могут позволить злоумышленникам получить доступ к серверам и учетным записям")
+            elif 'permission' in category or 'file' in category:
+                console.print(f"    [yellow]⚠️  Почему критично:[/yellow] Слишком открытые права могут привести к утечке конфиденциальных данных")
+            elif 'sensitive' in category:
+                console.print(f"    [yellow]⚠️  Почему критично:[/yellow] Файлы с секретами могут быть скомпрометированы при утечке данных")
+            else:
+                console.print(f"    [yellow]⚠️  Почему критично:[/yellow] Требует немедленного внимания для предотвращения утечки данных или несанкционированного доступа")
+            
+            if issue.get("recommendation"):
+                console.print(f"    [green]💡 Рекомендация:[/green] {issue['recommendation']}")
+            console.print()
+        
+        if security_results.get("high_severity_issues", 0) > 10:
+            console.print(f"[dim]... и еще {security_results.get('high_severity_issues', 0) - 10} критических проблем[/dim]\n")
+        
+        console.print("[yellow]💡 Для получения полного отчета со всеми проблемами:[/yellow]")
+        console.print("   1. Сохраните результаты: [bold]syscleaner scan --all --save-results results.json[/bold]")
+        console.print("   2. Создайте отчет: [bold]syscleaner report --format markdown --output report.md --from-scan results.json[/bold]")
+        console.print()
 
     # Сохраняем результаты если нужно
     if save_results:

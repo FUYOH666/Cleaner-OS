@@ -173,13 +173,55 @@ def generate_markdown_report(
     # Безопасность
     if security_results.get("issues"):
         report_lines.append("## Проблемы безопасности\n")
-        report_lines.append("| Уровень | Категория | Путь | Описание |\n")
-        report_lines.append("|---------|-----------|------|----------|\n")
-        for issue in security_results["issues"]:
-            report_lines.append(
-                f"| **{issue['severity']}** | {issue['category']} | `{issue['path']}` | {issue['description']} |\n",
-            )
-        report_lines.append("\n")
+        
+        # Группируем по уровню серьезности
+        high_issues = [i for i in security_results["issues"] if i.get("severity") == "high"]
+        medium_issues = [i for i in security_results["issues"] if i.get("severity") == "medium"]
+        low_issues = [i for i in security_results["issues"] if i.get("severity") == "low"]
+        
+        if high_issues:
+            report_lines.append("### 🔴 Критические проблемы (high)\n")
+            report_lines.append("| Категория | Путь | Описание | Почему критично | Рекомендация |\n")
+            report_lines.append("|-----------|------|----------|-----------------|--------------|\n")
+            for issue in high_issues:
+                why_critical = ""
+                category_lower = issue.get("category", "").lower()
+                if "ssh" in category_lower:
+                    why_critical = "Неправильные права могут позволить злоумышленникам получить доступ к серверам и учетным записям"
+                elif "permission" in category_lower or "file" in category_lower:
+                    why_critical = "Слишком открытые права могут привести к утечке конфиденциальных данных"
+                elif "sensitive" in category_lower:
+                    why_critical = "Файлы с секретами могут быть скомпрометированы при утечке данных"
+                else:
+                    why_critical = "Требует немедленного внимания для предотвращения утечки данных или несанкционированного доступа"
+                
+                recommendation = issue.get("recommendation", "N/A")
+                report_lines.append(
+                    f"| {issue['category']} | `{issue['path']}` | {issue['description']} | {why_critical} | {recommendation} |\n",
+                )
+            report_lines.append("\n")
+        
+        if medium_issues:
+            report_lines.append("### 🟡 Средние проблемы (medium)\n")
+            report_lines.append("| Категория | Путь | Описание | Рекомендация |\n")
+            report_lines.append("|-----------|------|----------|--------------|\n")
+            for issue in medium_issues:
+                recommendation = issue.get("recommendation", "N/A")
+                report_lines.append(
+                    f"| {issue['category']} | `{issue['path']}` | {issue['description']} | {recommendation} |\n",
+                )
+            report_lines.append("\n")
+        
+        if low_issues:
+            report_lines.append("### 🟢 Низкие проблемы (low)\n")
+            report_lines.append("| Категория | Путь | Описание | Рекомендация |\n")
+            report_lines.append("|-----------|------|----------|--------------|\n")
+            for issue in low_issues:
+                recommendation = issue.get("recommendation", "N/A")
+                report_lines.append(
+                    f"| {issue['category']} | `{issue['path']}` | {issue['description']} | {recommendation} |\n",
+                )
+            report_lines.append("\n")
 
     # Рекомендации по очистке
     if cleanup_analysis.get("recommendations"):
