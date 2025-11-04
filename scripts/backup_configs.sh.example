@@ -1,0 +1,68 @@
+#!/bin/bash
+# Backup Critical Configurations Script
+# Создает резервные копии критичных конфигураций системы
+# Универсальная версия для GitHub репозитория
+
+set -euo pipefail
+
+# Определяем путь к скрипту (работает независимо от текущей директории)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BACKUP_DIR="${PROJECT_ROOT}/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_PATH="${BACKUP_DIR}/config_backup_${DATE}"
+
+mkdir -p "$BACKUP_PATH"
+
+echo "Создание резервной копии конфигураций..."
+echo "Целевая директория: $BACKUP_PATH"
+echo ""
+
+# SSH конфигурация
+if [ -d "$HOME/.ssh" ]; then
+    mkdir -p "$BACKUP_PATH/ssh"
+    cp -r "$HOME/.ssh"/* "$BACKUP_PATH/ssh/" 2>/dev/null || true
+    echo "✓ SSH конфигурация скопирована"
+fi
+
+# Shell конфигурация
+mkdir -p "$BACKUP_PATH/shell"
+for file in .bashrc .bash_aliases .profile .zshrc; do
+    if [ -f "$HOME/$file" ]; then
+        cp "$HOME/$file" "$BACKUP_PATH/shell/" 2>/dev/null || true
+    fi
+done
+echo "✓ Shell конфигурация скопирована"
+
+# Cleaner-OS конфигурация
+if [ -f "${PROJECT_ROOT}/config.yaml" ]; then
+    mkdir -p "$BACKUP_PATH/cleaner-os"
+    cp "${PROJECT_ROOT}/config.yaml" "$BACKUP_PATH/cleaner-os/" 2>/dev/null || true
+    echo "✓ Cleaner-OS конфигурация скопирована"
+fi
+
+# Список критичных файлов
+cat > "$BACKUP_PATH/README.md" << EOF
+# Резервная копия конфигураций
+Дата создания: $(date)
+Система: $(uname -a)
+
+## Содержимое:
+- SSH конфигурация (\$HOME/.ssh/)
+- Shell конфигурация (\$HOME/.bashrc, \$HOME/.profile, и т.д.)
+- Cleaner-OS конфигурация (config.yaml)
+
+## Восстановление:
+\`\`\`bash
+# Shell
+cp backup/shell/.bashrc ~/
+cp backup/shell/.profile ~/
+
+# Cleaner-OS
+cp backup/cleaner-os/config.yaml ${PROJECT_ROOT}/
+\`\`\`
+EOF
+
+echo ""
+echo "✓ Резервная копия создана: $BACKUP_PATH"
+echo "Размер: $(du -sh "$BACKUP_PATH" 2>/dev/null | cut -f1 || echo 'N/A')"
