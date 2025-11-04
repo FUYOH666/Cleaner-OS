@@ -179,12 +179,12 @@ def check_outdated_dependencies(project_path: Path) -> list[dict[str, Any]]:
     return outdated
 
 
-def analyze_python_dependencies(projects_dir: Path) -> dict[str, Any]:
+def analyze_python_dependencies(projects_dirs: list[Path]) -> dict[str, Any]:
     """
     Анализировать Python зависимости во всех проектах.
 
     Args:
-        projects_dir: Директория с проектами.
+        projects_dirs: Список директорий с проектами.
 
     Returns:
         Словарь с результатами анализа.
@@ -192,16 +192,22 @@ def analyze_python_dependencies(projects_dir: Path) -> dict[str, Any]:
     all_conflicts: list[dict[str, Any]] = []
     all_unused: list[dict[str, Any]] = []
     all_outdated: list[dict[str, Any]] = []
+    python_projects: list[Path] = []
 
-    # Ищем все проекты с pyproject.toml или requirements.txt
-    python_projects = []
+    # Ищем все проекты с pyproject.toml или requirements.txt во всех директориях
+    for projects_dir in projects_dirs:
+        if not projects_dir.exists() or not projects_dir.is_dir():
+            continue
 
-    for project_path in projects_dir.iterdir():
-        if project_path.is_dir():
-            if (project_path / "pyproject.toml").exists() or (
-                project_path / "requirements.txt"
-            ).exists():
-                python_projects.append(project_path)
+        try:
+            for project_path in projects_dir.iterdir():
+                if project_path.is_dir():
+                    if (project_path / "pyproject.toml").exists() or (
+                        project_path / "requirements.txt"
+                    ).exists():
+                        python_projects.append(project_path)
+        except Exception as e:
+            logger.debug(f"Ошибка при сканировании {projects_dir}: {e}")
 
     logger.info(f"Найдено {len(python_projects)} Python проектов")
 

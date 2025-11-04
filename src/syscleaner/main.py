@@ -16,6 +16,8 @@ from syscleaner.cleanup import analyze_cleanup_opportunities
 from syscleaner.config import load_config
 from syscleaner.platform import PlatformPaths
 from syscleaner.platform.detector import IS_LINUX, IS_MACOS, CURRENT_PLATFORM
+from syscleaner.platform.linux import detect_linux_distro
+from syscleaner.platform.system_info import detect_gpu, get_home_disk_info
 from syscleaner.reporter import generate_json_report, generate_markdown_report, save_report
 from syscleaner.scanner import (
     scan_application_support,
@@ -150,7 +152,13 @@ def scan(
         sys.exit(1)
 
     paths = PlatformPaths()
-    projects_dir = paths.home / "development"
+    # Автоматически находим директории проектов
+    project_dirs = paths.find_project_directories()
+    # Если не найдено, используем стандартную директорию как fallback
+    if not project_dirs:
+        fallback_dir = paths.home / "development"
+        if fallback_dir.exists():
+            project_dirs = [fallback_dir]
 
     scan_results: dict = {
         "caches": [],
@@ -192,7 +200,7 @@ def scan(
         if all or projects:
             task = progress.add_task("Сканирование проектов...", total=None)
             scan_results["project_artifacts"] = scan_project_artifacts(
-                projects_dir,
+                project_dirs,
                 settings.cleanup.safe_to_delete_patterns,
             )
             progress.update(task, completed=True)
@@ -236,8 +244,8 @@ def scan(
         if all or dependencies or settings.scan.check_dependencies:
             task = progress.add_task("Анализ зависимостей...", total=None)
             try:
-                if projects_dir.exists():
-                    dependency_results = analyze_python_dependencies(projects_dir)
+                if project_dirs:
+                    dependency_results = analyze_python_dependencies(project_dirs)
                 else:
                     dependency_results = {"total_projects": 0, "conflicts": [], "unused_dependencies": [], "outdated_dependencies": []}
             except Exception as e:
@@ -429,9 +437,39 @@ def health() -> None:
     if IS_MACOS:
         console.print(f"[green]✓[/green] macOS {platform.release()}")
     elif IS_LINUX:
-        console.print(f"[green]✓[/green] Linux {platform.release()}")
+        distro = detect_linux_distro()
+        if distro:
+            distro_info = f"{distro.name}"
+            if distro.version:
+                distro_info += f" {distro.version}"
+            console.print(f"[green]✓[/green] Linux {platform.release()} ({distro_info})")
+        else:
+            console.print(f"[green]✓[/green] Linux {platform.release()}")
     else:
         console.print(f"[yellow]⚠[/yellow] Неподдерживаемая платформа: {platform_name}")
+
+    # Проверка железа
+    console.print("\n[bold]Информация о системе:[/bold]")
+    
+    # GPU
+    gpu_info = detect_gpu()
+    if gpu_info.has_gpu:
+        gpu_str = f"GPU: {gpu_info.gpu_type}"
+        if gpu_info.gpu_model:
+            gpu_str += f" ({gpu_info.gpu_model})"
+        console.print(f"[green]✓[/green] {gpu_str}")
+    else:
+        console.print("[dim]GPU: не обнаружен[/dim]")
+    
+    # Диск
+    disk_info = get_home_disk_info()
+    if disk_info:
+        console.print(
+            f"[green]✓[/green] Диск: {disk_info.total_gb:.1f} GB "
+            f"(использовано: {disk_info.used_gb:.1f} GB, "
+            f"свободно: {disk_info.free_gb:.1f} GB, "
+            f"занято: {disk_info.usage_percent:.1f}%)"
+        )
 
     # Проверка доступности критичных путей
     paths = PlatformPaths()
@@ -449,6 +487,18 @@ def health() -> None:
             console.print(f"[green]✓[/green] {name}: {path}")
         else:
             console.print(f"[yellow]⚠[/yellow] {name}: {path} (не найдено)")
+
+    # Найденные проекты
+    project_dirs = paths.find_project_directories()
+    if project_dirs:
+        console.print(f"\n[bold]Найденные директории проектов ({len(project_dirs)}):[/bold]")
+        for project_dir in project_dirs[:10]:  # Показываем первые 10
+            console.print(f"[green]✓[/green] {project_dir}")
+        if len(project_dirs) > 10:
+            console.print(f"[dim]... и еще {len(project_dirs) - 10} директорий[/dim]")
+    else:
+        console.print("\n[yellow]⚠[/yellow] Директории проектов не найдены")
+        console.print("[dim]Инструмент будет искать проекты в стандартных местах при сканировании[/dim]")
 
     # Проверка конфигурации
     console.print("\n[bold]Проверка конфигурации:[/bold]")
