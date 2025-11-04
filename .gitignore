@@ -53,6 +53,7 @@ scan_results*.json
 PROJECT_STATUS.md
 vcpost.md
 github.md
+vc_rules.md
 
 # OS
 .DS_Store
