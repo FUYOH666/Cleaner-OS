@@ -51,6 +51,8 @@ scan_results*.json
 .env
 .env.local
 PROJECT_STATUS.md
+vcpost.md
+github.md
 
 # OS
 .DS_Store
