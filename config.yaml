@@ -1,0 +1,58 @@
+# Конфигурация System Cleaner
+# Этот файл определяет параметры сканирования и очистки системы
+
+scan:
+  # Пути для исключения из сканирования
+  # Используйте ~ для домашней директории пользователя
+  exclude_paths:
+    - ~/Library/Mail/           # macOS: почта (может быть большой)
+    - ~/Library/Messages/       # macOS: сообщения (может быть большой)
+    - ~/Library/Photos/         # macOS: фото библиотека (может быть большой)
+    - ~/.local/share/mail/      # Linux: почта
+    - ~/.local/share/messages/  # Linux: сообщения
+  
+  # Минимальный размер в MB для включения в отчет
+  min_size_mb: 10
+  
+  # Включить проверку безопасности
+  check_security: true
+  
+  # Проверять артефакты проектов разработки
+  check_project_artifacts: true
+  
+  # Проверять конфликты и неиспользуемые зависимости в Python проектах
+  check_dependencies: true
+  
+  # Проверять кэши ML моделей (Hugging Face, PyTorch, TensorFlow)
+  check_ml_cache: true
+
+security:
+  # Паттерны для поиска файлов с потенциально чувствительными данными
+  sensitive_patterns:
+    - "*.env"
+    - "*credentials*"
+    - "*secret*"
+    - "*password*"
+    - "*token*"
+    - "*api_key*"
+  
+  # Проверять права доступа SSH ключей
+  check_ssh_permissions: true
+  
+  # Проверять права доступа файлов
+  check_file_permissions: true
+
+cleanup:
+  # Паттерны файлов и директорий, безопасных для удаления
+  safe_to_delete_patterns:
+    - "**/__pycache__"      # Python кэш байткода
+    - "**/.DS_Store"        # macOS метаданные
+    - "**/node_modules"     # Node.js зависимости (будьте осторожны!)
+    - "**/*.pyc"            # Скомпилированные Python файлы
+    - "**/.pytest_cache"    # Кэш pytest
+    - "**/.mypy_cache"      # Кэш mypy
+    - "**/.ruff_cache"      # Кэш ruff
+    - "**/dist"             # Директория сборки
+    - "**/build"            # Директория сборки
+    - "**/*.egg-info"       # Метаданные Python пакетов
+
