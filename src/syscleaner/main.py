@@ -29,8 +29,9 @@ from syscleaner.scanner import (
 )
 
 # Настройка логирования
+# Формат: ts level service msg meta (с pathname:lineno для отладки)
 logging.basicConfig(
-    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    format="%(asctime)s %(levelname)-8s %(name)s %(message)s [%(pathname)s:%(lineno)d]",
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)

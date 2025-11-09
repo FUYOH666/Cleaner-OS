@@ -1,12 +1,14 @@
-"""Базовые тесты для macos_audit."""
+"""Базовые тесты для syscleaner."""
 
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from macos_audit.config import load_config, ScanConfig, SecurityConfig, Settings
-from macos_audit.scanner import get_directory_size, scan_trash
+from syscleaner.config import load_config, ScanConfig, SecurityConfig, Settings
+from syscleaner.platform.paths import PlatformPaths
+from syscleaner.scanner.trash import scan_trash
+from syscleaner.scanner.utils import get_directory_size
 
 
 def test_config_defaults() -> None:
@@ -47,23 +49,24 @@ def test_get_directory_size(tmp_path: Path) -> None:
     assert isinstance(size, int)
 
 
-def test_scan_trash_empty(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_scan_trash_empty(tmp_path: Path) -> None:
     """Тест сканирования пустой корзины."""
-    # Мокаем домашнюю директорию
+    # Создаем тестовую структуру
     fake_home = tmp_path / "home"
     fake_home.mkdir()
     trash_dir = fake_home / ".Trash"
     trash_dir.mkdir()
 
-    monkeypatch.setattr(Path, "home", lambda: fake_home)
+    # Создаем PlatformPaths с тестовой домашней директорией
+    paths = PlatformPaths(home=fake_home)
 
-    result = scan_trash(fake_home)
+    result = scan_trash(paths)
     assert result["size_bytes"] == 0
     assert result["count"] == 0
     assert "path" in result
 
 
-def test_scan_trash_with_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_scan_trash_with_files(tmp_path: Path) -> None:
     """Тест сканирования корзины с файлами."""
     fake_home = tmp_path / "home"
     fake_home.mkdir()
@@ -71,9 +74,10 @@ def test_scan_trash_with_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     trash_dir.mkdir()
     (trash_dir / "deleted_file.txt").write_text("deleted content")
 
-    monkeypatch.setattr(Path, "home", lambda: fake_home)
+    # Создаем PlatformPaths с тестовой домашней директорией
+    paths = PlatformPaths(home=fake_home)
 
-    result = scan_trash(fake_home)
+    result = scan_trash(paths)
     assert result["size_bytes"] > 0
     assert result["count"] == 1
 

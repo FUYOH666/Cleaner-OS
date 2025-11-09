@@ -72,7 +72,7 @@ ignore = []
 
 [tool.pyright]
 pythonVersion = "3.12"
-pythonPlatform = ["Darwin", "Linux"]
+pythonPlatform = "Linux"
 
 [dependency-groups]
 dev = [

@@ -46,10 +46,12 @@ htmlcov/
 
 # Project specific
 *.log
+logs/
 scan_results*.json
 *.md.report
 .env
 .env.local
+config.yaml
 PROJECT_STATUS.md
 vcpost.md
 github.md
