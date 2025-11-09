@@ -4,41 +4,41 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/FUYOH666/Cleaner-OS)
 
-> **Универсальный CLI инструмент для очистки и аудита системы**
+> **Universal CLI tool for system cleanup and audit**
 
-System Cleaner помогает найти и удалить мусор, проанализировать зависимости, проверить безопасность и оптимизировать использование дискового пространства на macOS и Linux.
+System Cleaner helps you find and remove junk, analyze dependencies, check security, and optimize disk space usage on macOS and Linux.
 
-## 🎯 Проблемы, которые решает проект
+## 🎯 Problems Solved
 
-- **Неиспользуемые ML модели** занимают гигабайты места (Hugging Face, PyTorch, TensorFlow)
-- **Конфликты зависимостей** в Python проектах остаются незамеченными
-- **Остатки удаленных приложений** засоряют систему
-- **Проблемы безопасности** (неправильные права доступа, секреты в коде)
-- **Артефакты сборки** накапливаются в проектах разработки
-- **Неиспользуемые зависимости** увеличивают размер проектов
+- **Unused ML models** taking up gigabytes of space (Hugging Face, PyTorch, TensorFlow)
+- **Dependency conflicts** in Python projects going unnoticed
+- **Removed application leftovers** cluttering the system
+- **Security issues** (incorrect file permissions, secrets in code)
+- **Build artifacts** accumulating in development projects
+- **Unused dependencies** increasing project size
 
-## ✨ Возможности
+## ✨ Features
 
-- 🔍 **Сканирование системы** - поиск кэшей, логов, остатков приложений
-- 🧠 **Анализ ML кэшей** - обнаружение неиспользуемых моделей Hugging Face, PyTorch, TensorFlow
-- 📦 **Анализ зависимостей** - проверка конфликтов, неиспользуемых и устаревших зависимостей Python
-- 🔒 **Проверка безопасности** - анализ прав доступа, поиск секретов, проверка SSH ключей
-- 🗑️ **Рекомендации по очистке** - что можно безопасно удалить и сколько места освободится
-- 🌐 **Кроссплатформенность** - работает на macOS и Linux
-- 📊 **Детальные отчеты** - Markdown и JSON форматы
+- 🔍 **System scanning** - find caches, logs, application leftovers
+- 🧠 **ML cache analysis** - detect unused Hugging Face, PyTorch, TensorFlow models
+- 📦 **Dependency analysis** - check for conflicts, unused and outdated Python dependencies
+- 🔒 **Security checks** - analyze file permissions, find secrets, check SSH keys
+- 🗑️ **Cleanup recommendations** - what can be safely deleted and how much space will be freed
+- 🌐 **Cross-platform** - works on macOS and Linux
+- 📊 **Detailed reports** - Markdown and JSON formats
 
-## 🌐 Кроссплатформенность и автоматическая адаптация
+## 🌐 Cross-platform Support and Automatic Adaptation
 
-System Cleaner **автоматически адаптируется** под вашу систему без дополнительной настройки:
+System Cleaner **automatically adapts** to your system without additional configuration:
 
-### Автоматическое определение платформы
-- Определяет macOS или Linux при запуске
-- Адаптирует пути под вашу операционную систему:
+### Automatic Platform Detection
+- Detects macOS or Linux on startup
+- Adapts paths to your operating system:
   - **macOS:** `~/Library/Caches/`, `~/Library/Application Support/`
   - **Linux:** `~/.cache/`, `~/.local/share/`
 
-### Автоматический поиск проектов
-Инструмент автоматически находит проекты разработки в стандартных местах:
+### Automatic Project Discovery
+The tool automatically finds development projects in standard locations:
 - `~/development/`
 - `~/dev/`
 - `~/projects/`
@@ -47,164 +47,164 @@ System Cleaner **автоматически адаптируется** под в
 - `~/Documents/Projects/`
 - `~/Documents/Code/`
 
-Ищет проекты по признакам:
-- Git репозитории (наличие `.git`)
-- Python проекты (`pyproject.toml`, `requirements.txt`)
-- Node.js проекты (`package.json`)
-- Rust проекты (`Cargo.toml`)
-- Go проекты (`go.mod`)
+Finds projects by indicators:
+- Git repositories (presence of `.git`)
+- Python projects (`pyproject.toml`, `requirements.txt`)
+- Node.js projects (`package.json`)
+- Rust projects (`Cargo.toml`)
+- Go projects (`go.mod`)
 
-### Определение дистрибутива Linux
-Автоматически определяет дистрибутив Linux для более точной адаптации путей:
+### Linux Distribution Detection
+Automatically detects Linux distribution for more accurate path adaptation:
 - Ubuntu/Debian
 - Fedora/RHEL/CentOS
 - Arch Linux
-- И другие (через `/etc/os-release`)
+- Others (via `/etc/os-release`)
 
-### Определение железа
-Команда `health` показывает информацию о вашей системе:
-- **GPU:** наличие и тип (NVIDIA, AMD, Intel, Metal)
-- **Диск:** размер, свободное место, процент использования
+### Hardware Detection
+The `health` command shows information about your system:
+- **GPU:** presence and type (NVIDIA, AMD, Intel, Metal)
+- **Disk:** size, free space, usage percentage
 
-### Работа без конфигурации
-Инструмент работает **из коробки** без `config.yaml`:
-- Использует значения по умолчанию
-- Автоматически находит все необходимое
-- Адаптируется под вашу систему
+### Works Without Configuration
+The tool works **out of the box** without `config.yaml`:
+- Uses default values
+- Automatically finds everything needed
+- Adapts to your system
 
-Конфигурация нужна только для:
-- Исключения специфичных путей из сканирования
-- Настройки минимального размера для отчета
-- Включения/выключения отдельных проверок
+Configuration is only needed for:
+- Excluding specific paths from scanning
+- Setting minimum size for reports
+- Enabling/disabling individual checks
 
-## 📋 Требования
+## 📋 Requirements
 
-- **Python 3.12** - единственная поддерживаемая версия
-- **uv** - менеджер пакетов (устанавливается автоматически)
-- **macOS** или **Linux** - инструмент поддерживает обе платформы
+- **Python 3.12** - the only supported version
+- **uv** - package manager (installed automatically)
+- **macOS** or **Linux** - the tool supports both platforms
 
-## 🚀 Установка
+## 🚀 Installation
 
-### С помощью uv (рекомендуется)
+### Using uv (recommended)
 
 ```bash
-# Клонируйте репозиторий
+# Clone the repository
 git clone git@github.com:FUYOH666/Cleaner-OS.git
 cd Cleaner-OS
 
-# Установите зависимости
+# Install dependencies
 uv sync
 
-# Проверьте установку
+# Verify installation
 uv run python -m syscleaner health
 ```
 
-### После установки
+### After Installation
 
-После установки пакета вы можете использовать команду напрямую:
+After installing the package, you can use the command directly:
 
 ```bash
 syscleaner health
-# или
+# or
 system-cleaner health
 ```
 
-### Дополнительные скрипты
+### Additional Scripts
 
-В директории `scripts/` доступны вспомогательные скрипты для работы с System Cleaner:
+The `scripts/` directory contains helper scripts for working with System Cleaner:
 
-- **`system_health_check.sh.example`** - Комплексная проверка состояния системы (GPU, CPU, память, диск, сервисы, Docker GPU)
-- **`backup_configs.sh.example`** - Резервное копирование критичных конфигураций системы
+- **`system_health_check.sh.example`** - Comprehensive system health check (GPU, CPU, memory, disk, services, Docker GPU)
+- **`backup_configs.sh.example`** - Backup critical system configurations
 
-**Использование:**
+**Usage:**
 ```bash
-# Скопируйте example файлы в рабочие скрипты
+# Copy example files to working scripts
 cp scripts/system_health_check.sh.example scripts/system_health_check.sh
 cp scripts/backup_configs.sh.example scripts/backup_configs.sh
 
-# Сделайте исполняемыми
+# Make them executable
 chmod +x scripts/*.sh
 
-# Запустите
+# Run
 ./scripts/system_health_check.sh
 ./scripts/backup_configs.sh
 ```
 
-Скрипты используют относительные пути и работают на macOS и Linux. См. [scripts/README.md](scripts/README.md) для подробностей.
+Scripts use relative paths and work on macOS and Linux. See [scripts/README.md](scripts/README.md) for details.
 
-## 📖 Использование
+## 📖 Usage
 
-### Полное сканирование системы
+### Full System Scan
 
 ```bash
 syscleaner scan --all
 ```
 
-Это выполнит:
-- Сканирование кэшей и временных файлов
-- Поиск остатков удаленных приложений
-- Анализ скрытых файлов
-- Проверку артефактов проектов
-- Анализ ML кэшей (Hugging Face, PyTorch, TensorFlow)
-- Проверку зависимостей Python
-- Анализ безопасности
+This will perform:
+- Cache and temporary file scanning
+- Search for removed application leftovers
+- Hidden file analysis
+- Project artifact checks
+- ML cache analysis (Hugging Face, PyTorch, TensorFlow)
+- Python dependency checks
+- Security analysis
 
-### Сканирование отдельных категорий
+### Scanning Individual Categories
 
 ```bash
-# Только кэши
+# Caches only
 syscleaner scan --caches
 
-# Только безопасность
+# Security only
 syscleaner scan --security
 
-# Только проекты
+# Projects only
 syscleaner scan --projects
 
-# Анализ зависимостей
+# Dependency analysis
 syscleaner scan --dependencies
 
-# Анализ ML кэшей (Hugging Face, PyTorch, TensorFlow)
+# ML cache analysis (Hugging Face, PyTorch, TensorFlow)
 syscleaner scan --ml-cache
 ```
 
-### Сохранение результатов
+### Saving Results
 
 ```bash
-# Сохранить результаты в JSON
+# Save results to JSON
 syscleaner scan --all --save-results scan_results.json
 ```
 
-### Генерация отчета
+### Report Generation
 
 ```bash
-# Markdown отчет
+# Markdown report
 syscleaner report --format markdown --output report.md --from-scan scan_results.json
 
-# JSON отчет
+# JSON report
 syscleaner report --format json --output report.json --from-scan scan_results.json
 ```
 
-### Проверка состояния системы
+### System Health Check
 
 ```bash
 syscleaner health
 ```
 
-## ⚙️ Конфигурация
+## ⚙️ Configuration
 
-Инструмент использует `config.yaml` для настройки сканирования. Если файл отсутствует, инструмент работает с настройками по умолчанию.
+The tool uses `config.yaml` for scan configuration. If the file is missing, the tool works with default settings.
 
-**Создание конфигурации:**
+**Creating configuration:**
 ```bash
-# Скопируйте пример конфигурации
+# Copy the example configuration
 cp config.yaml.example config.yaml
 
-# Отредактируйте под свои нужды
+# Edit to your needs
 nano config.yaml
 ```
 
-Пример конфигурации (`config.yaml.example`):
+Example configuration (`config.yaml.example`):
 
 ```yaml
 scan:
@@ -216,8 +216,8 @@ scan:
   min_size_mb: 10
   check_security: true
   check_project_artifacts: true
-  check_dependencies: true  # Проверка конфликтов и неиспользуемых зависимостей
-  check_ml_cache: true  # Проверка кэшей ML моделей
+  check_dependencies: true  # Check for conflicts and unused dependencies
+  check_ml_cache: true  # Check ML model caches
 
 security:
   sensitive_patterns:
@@ -239,78 +239,78 @@ cleanup:
     - "**/.pytest_cache"
 ```
 
-## 🔍 Что сканирует инструмент
+## 🔍 What the Tool Scans
 
-### 1. Кэши и временные файлы
-- **macOS:** `~/Library/Caches/` - анализ размера по приложениям
-- **Linux:** `~/.cache/` - анализ размера по приложениям
-- Остатки удаленных приложений
-- Старые логи
-- Корзина
-- Системные кэши
+### 1. Caches and Temporary Files
+- **macOS:** `~/Library/Caches/` - size analysis by application
+- **Linux:** `~/.cache/` - size analysis by application
+- Removed application leftovers
+- Old logs
+- Trash
+- System caches
 
-### 2. Остатки удаленных приложений
-- **macOS:** Сравнение `~/Library/Application Support/` с `/Applications`
-- **Linux:** Сравнение `~/.local/share/` с установленными пакетами (apt, yum, dnf, pacman)
-- Поддержка Flatpak и Snap приложений (Linux)
-- Поиск orphaned пакетов
+### 2. Removed Application Leftovers
+- **macOS:** Compare `~/Library/Application Support/` with `/Applications`
+- **Linux:** Compare `~/.local/share/` with installed packages (apt, yum, dnf, pacman)
+- Flatpak and Snap application support (Linux)
+- Orphaned package detection
 
-### 3. Проверка безопасности
-- Анализ прав доступа критичных файлов (~/.ssh/, ~/.aws/)
-- Проверка SSH ключей (открытые приватные ключи)
-- Поиск файлов с секретами (.env, credentials, API keys)
-- Проверка небезопасных конфигов (world-readable sensitive files)
-- Кроссплатформенная поддержка
+### 3. Security Checks
+- Analysis of critical file permissions (~/.ssh/, ~/.aws/)
+- SSH key checks (exposed private keys)
+- Search for files with secrets (.env, credentials, API keys)
+- Insecure config checks (world-readable sensitive files)
+- Cross-platform support
 
-### 4. Анализ скрытых файлов
-- Поиск скрытых файлов/папок в домашней директории
-- Анализ размера скрытых директорий
-- Поиск больших скрытых файлов (>100MB по умолчанию)
+### 4. Hidden File Analysis
+- Search for hidden files/folders in home directory
+- Analysis of hidden directory sizes
+- Search for large hidden files (>100MB by default)
 
-### 5. Оптимизация проектов разработки
-- Поиск `__pycache__`, `.pytest_cache`, `.DS_Store`
-- Анализ `node_modules` (если есть Node.js проекты)
-- Поиск больших артефактов сборки (dist/, build/, *.egg-info)
-- Очистка виртуальных окружений (venv, .venv)
+### 5. Development Project Optimization
+- Find `__pycache__`, `.pytest_cache`, `.DS_Store`
+- Analyze `node_modules` (if Node.js projects exist)
+- Find large build artifacts (dist/, build/, *.egg-info)
+- Clean virtual environments (venv, .venv)
 
-### 6. Анализ ML кэшей ⭐
-- **Hugging Face:** `~/.cache/huggingface/` (Linux) или `~/Library/Caches/huggingface/` (macOS)
-  - Определение всех загруженных моделей
-  - Размер каждой модели
-  - Дата последнего использования
-  - Определение неиспользуемых моделей (старше 30 дней)
+### 6. ML Cache Analysis ⭐
+- **Hugging Face:** `~/.cache/huggingface/` (Linux) or `~/Library/Caches/huggingface/` (macOS)
+  - Identify all downloaded models
+  - Size of each model
+  - Last usage date
+  - Identify unused models (older than 30 days)
 - **PyTorch:** `~/.cache/torch/`
-  - Предзагруженные модели
-  - Кэш датасетов
-- **TensorFlow:** `~/.cache/tensorflow/` или `~/.keras/`
-  - Сохраненные модели
-  - Кэш датасетов
-- Проверка дубликатов моделей
-- Рекомендации по очистке неиспользуемых моделей
+  - Preloaded models
+  - Dataset cache
+- **TensorFlow:** `~/.cache/tensorflow/` or `~/.keras/`
+  - Saved models
+  - Dataset cache
+- Duplicate model detection
+- Recommendations for cleaning unused models
 
-### 7. Анализ зависимостей ⭐
-- **Python зависимости:**
-  - Проверка конфликтов зависимостей через `uv pip check`
-  - Поиск неиспользуемых зависимостей (анализ импортов)
-  - Проверка устаревших зависимостей
-  - Анализ `pyproject.toml` и `uv.lock` на дубликаты и конфликты
+### 7. Dependency Analysis ⭐
+- **Python dependencies:**
+  - Check for dependency conflicts via `uv pip check`
+  - Find unused dependencies (import analysis)
+  - Check for outdated dependencies
+  - Analyze `pyproject.toml` and `uv.lock` for duplicates and conflicts
 
-## 📊 Формат отчетов
+## 📊 Report Formats
 
-### Markdown отчет
-Содержит структурированную информацию с таблицами:
-- Сводка сканирования
-- ML кэши моделей (количество, размер, неиспользуемые)
-- Анализ зависимостей (конфликты, неиспользуемые, устаревшие)
-- Кэши
-- Остатки приложений
-- Скрытые файлы
-- Артефакты проектов
-- Проблемы безопасности
-- Рекомендации по очистке
+### Markdown Report
+Contains structured information with tables:
+- Scan summary
+- ML model caches (count, size, unused)
+- Dependency analysis (conflicts, unused, outdated)
+- Caches
+- Application leftovers
+- Hidden files
+- Project artifacts
+- Security issues
+- Cleanup recommendations
 
-### JSON отчет
-Структурированные данные для автоматической обработки:
+### JSON Report
+Structured data for automated processing:
 ```json
 {
   "timestamp": "2025-11-04T12:00:00",
@@ -323,40 +323,47 @@ cleanup:
 }
 ```
 
-## 🛡️ Безопасность
+## 🛡️ Security
 
-- **Fail-fast подход** - при ошибке конфигурации приложение останавливается
-- **Никаких автоматических удалений** - инструмент только анализирует и рекомендует
-- **Валидация путей** - все пути проверяются перед обработкой
-- **Логирование** - все действия логируются для аудита
-- **Кроссплатформенная безопасность** - проверки работают на macOS и Linux
+- **Fail-fast approach** - application stops on configuration errors
+- **No automatic deletions** - tool only analyzes and recommends
+- **Path validation** - all paths are validated before processing
+- **Logging** - all actions are logged for audit
+- **Cross-platform security** - checks work on macOS and Linux
 
 ## 🤝 Contributing
 
-Мы приветствуем вклад в проект! Пожалуйста:
+We welcome contributions! Please:
 
-1. Fork репозиторий
-2. Создайте ветку для вашей функции (`git checkout -b feature/amazing-feature`)
-3. Commit изменения (`git commit -m 'Add some amazing feature'`)
-4. Push в ветку (`git push origin feature/amazing-feature`)
-5. Откройте Pull Request
+1. Fork the repository
+2. Create a branch for your feature (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
+### Code Requirements
 
-## 📄 Лицензия
+- Python 3.12
+- Use `uv` for dependency management
+- Follow code style (ruff)
+- Type checking (pyright)
+- Tests for new functionality
 
-Этот проект распространяется под лицензией MIT. См. [LICENSE](LICENSE) для подробностей.
+## 📄 License
 
-## 👤 Автор
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## 👤 Author
 
 **Aleksandr Mordvinov**
 
 - GitHub: [@FUYOH666](https://github.com/FUYOH666)
-- Репозиторий: [Cleaner-OS](https://github.com/FUYOH666/Cleaner-OS)
+- Repository: [Cleaner-OS](https://github.com/FUYOH666/Cleaner-OS)
 
-## 🙏 Благодарности
+## 🙏 Acknowledgments
 
-Спасибо всем, кто помогает улучшать этот проект!
+Thanks to everyone who helps improve this project!
 
 ---
 
-**Примечание**: Этот инструмент предназначен только для анализа и рекомендаций. Все действия по удалению файлов выполняются пользователем вручную.
+**Note**: This tool is intended for analysis and recommendations only. All file deletion actions are performed manually by the user.
