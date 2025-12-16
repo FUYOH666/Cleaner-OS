@@ -371,4 +371,25 @@ Thanks to everyone who helps improve this project!
 
 ---
 
+## 📚 Learn More
+
+- 🌐 **Portfolio Website:** [scanovich.ai](https://scanovich.ai)
+- 📖 **Project Details:** [View on scanovich.ai](https://scanovich.ai/projects/cleaner-os)
+- 💡 **Other Projects:** [View all projects](https://scanovich.ai/projects)
+- 📧 **Email:** [iamfuyoh@gmail.com](mailto:iamfuyoh@gmail.com)
+
+---
+
+<div align="center">
+
+**Made with ❤️ by [Aleksandr Mordvinov](https://github.com/FUYOH666)**
+
+⭐ If this project helped you, please give it a star!
+
+[⬆ Back to Top](#system-cleaner)
+
+</div>
+
+---
+
 **Note**: This tool is intended for analysis and recommendations only. All file deletion actions are performed manually by the user.
