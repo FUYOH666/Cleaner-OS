@@ -1,11 +1,8 @@
 """Базовые тесты для syscleaner."""
 
-import tempfile
 from pathlib import Path
 
-import pytest
-
-from syscleaner.config import load_config, ScanConfig, SecurityConfig, Settings
+from syscleaner.config import Settings, load_config
 from syscleaner.platform.paths import PlatformPaths
 from syscleaner.scanner.trash import scan_trash
 from syscleaner.scanner.utils import get_directory_size
@@ -99,4 +96,3 @@ security:
     assert settings.scan.min_size_mb == 50
     assert settings.scan.check_security is False
     assert settings.security.check_ssh_permissions is False
-

@@ -201,4 +201,3 @@ def get_home_disk_info() -> DiskInfo | None:
     """
     home = Path.home()
     return get_disk_info(home)
-

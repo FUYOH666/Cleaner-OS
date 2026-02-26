@@ -88,4 +88,3 @@ def scan_project_artifacts(
         )
 
     return sorted(results, key=lambda x: x["total_size_bytes"], reverse=True)
-

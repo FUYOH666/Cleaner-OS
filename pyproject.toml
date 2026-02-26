@@ -1,9 +1,9 @@
 [project]
 name = "syscleaner"
-version = "0.2.0"
-description = "Универсальный инструмент для очистки и аудита системы (macOS и Linux)"
+version = "0.3.0"
+description = "Universal CLI for system cleanup and audit (macOS and Linux)"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.15"
 license = {text = "MIT"}
 authors = [
     {name = "Aleksandr Mordvinov"}
@@ -30,16 +30,16 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Systems Administration",
     "Topic :: Utilities",
 ]
 dependencies = [
-    "typer>=0.9.0",
+    "typer>=0.15.0",
     "pydantic>=2.0.0,<3.0.0",
     "pydantic-settings>=2.0.0,<3.0.0",
     "rich>=13.0.0",
-    "pyyaml>=6.0.0",
-    "tomli>=2.0.0; python_version < '3.11'",
+    "pyyaml>=6.0.2",
 ]
 
 [project.urls]
@@ -50,8 +50,8 @@ Issues = "https://github.com/FUYOH666/Cleaner-OS/issues"
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4.0",
-    "ruff>=0.1.0",
-    "pyright>=1.1.0",
+    "ruff>=0.9.0",
+    "pyright>=1.1.400",
 ]
 
 [project.scripts]

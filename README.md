@@ -1,11 +1,6 @@
 # System Cleaner
 
-![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Code Style](https://img.shields.io/badge/code%20style-ruff-000000.svg)
-![Type Check](https://img.shields.io/badge/type%20check-pyright-blue.svg)
-
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/FUYOH666/Cleaner-OS)
 
@@ -82,11 +77,11 @@ Configuration is only needed for:
 - Setting minimum size for reports
 - Enabling/disabling individual checks
 
-## 📋 Requirements
+## Requirements
 
-- **Python 3.12** - the only supported version
+- **Python 3.12+** (3.12, 3.13 supported)
 - **uv** - package manager (installed automatically)
-- **macOS** or **Linux** - the tool supports both platforms
+- **macOS** or **Linux**
 
 ## 🚀 Installation
 
@@ -348,7 +343,7 @@ We welcome contributions! Please:
 
 ### Code Requirements
 
-- Python 3.12
+- Python 3.12+
 - Use `uv` for dependency management
 - Follow code style (ruff)
 - Type checking (pyright)

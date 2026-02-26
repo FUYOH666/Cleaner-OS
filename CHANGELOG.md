@@ -1,6 +1,27 @@
 # Changelog
 
-Все значимые изменения в проекте документируются в этом файле.
+All notable changes to this project are documented in this file.
+
+## [0.3.0] - 2026-02-26
+
+### Added
+
+- Python 3.13 support in CI matrix
+- English localization for CLI output and reports
+
+### Changed
+
+- **Dependencies:** Upgraded Typer (>=0.15), Ruff (>=0.9), Pyright (>=1.1.400), PyYAML (>=6.0.2)
+- **Removed:** `tomli` dependency (Python 3.12+ uses stdlib `tomllib`)
+- **Python:** `requires-python` set to `>=3.12,<3.15`
+- **Pre-commit:** Updated Ruff to v0.9, Pyright to v1.1.400, Bandit to 1.8.3
+- All user-facing strings translated to English
+- `config.yaml.example` comments translated to English
+- README: removed duplicate badges, updated Python requirement to 3.12+
+
+### Removed
+
+- `config.yaml` from repository (user config; use `config.yaml.example` as template)
 
 ## [0.2.1] - 2025-11-04
 
@@ -102,4 +123,5 @@
 - ✅ Сканирование артефактов проектов
 - ✅ Генерация отчетов (Markdown и JSON)
 
+[0.3.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v0.2.1...v0.3.0
 [0.2.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v0.1.0...v0.2.0

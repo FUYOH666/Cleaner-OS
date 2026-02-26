@@ -1,7 +1,6 @@
 """Модуль сканирования логов."""
 
 import logging
-from pathlib import Path
 from typing import Any
 
 from syscleaner.platform.paths import PlatformPaths
@@ -48,4 +47,3 @@ def scan_logs(paths: PlatformPaths) -> list[dict[str, Any]]:
         logger.error(f"Ошибка при сканировании логов: {e}")
 
     return sorted(results, key=lambda x: x["size_bytes"], reverse=True)
-

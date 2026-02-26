@@ -1,7 +1,6 @@
 """Модуль сканирования скрытых файлов."""
 
 import logging
-from pathlib import Path
 from typing import Any
 
 from syscleaner.platform.paths import PlatformPaths
@@ -70,4 +69,3 @@ def scan_hidden_files(paths: PlatformPaths, min_size_mb: float = 100) -> list[di
         logger.error(f"Ошибка при сканировании скрытых файлов: {e}")
 
     return sorted(results, key=lambda x: x["size_bytes"], reverse=True)
-

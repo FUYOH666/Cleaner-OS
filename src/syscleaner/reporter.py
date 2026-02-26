@@ -1,4 +1,4 @@
-"""Модуль генерации отчетов (кроссплатформенный)."""
+"""Cross-platform report generation module."""
 
 import json
 import logging
@@ -34,53 +34,47 @@ def generate_markdown_report(
     report_lines: list[str] = []
 
     report_lines.append("# System Cleaner Audit Report\n")
-    report_lines.append(f"**Платформа:** {platform}\n")
-    report_lines.append(f"**Дата сканирования:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+    report_lines.append(f"**Platform:** {platform}\n")
+    report_lines.append(f"**Scan date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
-    # Общая информация
-    report_lines.append("## Общая информация\n")
+    report_lines.append("## Summary\n")
     total_size_mb = (
         sum(item["size_mb"] for item in scan_results.get("caches", []))
         + sum(item["size_mb"] for item in scan_results.get("orphaned_apps", []))
         + sum(item["size_mb"] for item in scan_results.get("hidden_files", []))
     )
     report_lines.append(
-        f"- **Общий размер найденных данных:** {total_size_mb:.2f} MB ({total_size_mb / 1024:.2f} GB)\n"
+        f"- **Total data size:** {total_size_mb:.2f} MB ({total_size_mb / 1024:.2f} GB)\n"
     )
 
-    # ML кэши
     if ml_cache_results:
-        report_lines.append("## ML Кэши моделей\n")
+        report_lines.append("## ML Model Caches\n")
+        report_lines.append(f"- **Total models:** {ml_cache_results.get('total_models', 0)}\n")
         report_lines.append(
-            f"- **Всего моделей:** {ml_cache_results.get('total_models', 0)}\n"
+            f"- **Total size:** {ml_cache_results.get('total_size_gb', 0):.2f} GB\n"
         )
         report_lines.append(
-            f"- **Общий размер:** {ml_cache_results.get('total_size_gb', 0):.2f} GB\n"
+            f"- **Unused models:** {ml_cache_results.get('unused_models_count', 0)}\n"
         )
         report_lines.append(
-            f"- **Неиспользуемых моделей:** {ml_cache_results.get('unused_models_count', 0)}\n"
-        )
-        report_lines.append(
-            f"- **Размер неиспользуемых:** {ml_cache_results.get('unused_size_gb', 0):.2f} GB\n"
+            f"- **Unused size:** {ml_cache_results.get('unused_size_gb', 0):.2f} GB\n"
         )
         report_lines.append("\n")
 
         # Детали по типам кэшей
         if ml_cache_results.get("models_by_type"):
-            report_lines.append("### По типам кэшей\n")
-            report_lines.append("| Тип | Количество | Размер |\n")
+            report_lines.append("### By cache type\n")
+            report_lines.append("| Type | Count | Size |\n")
             report_lines.append("|-----|------------|--------|\n")
             for cache_type, models in ml_cache_results["models_by_type"].items():
                 total_size = sum(m["size_gb"] for m in models)
-                report_lines.append(
-                    f"| {cache_type} | {len(models)} | {total_size:.2f} GB |\n"
-                )
+                report_lines.append(f"| {cache_type} | {len(models)} | {total_size:.2f} GB |\n")
             report_lines.append("\n")
 
         # Топ моделей по размеру
         if ml_cache_results.get("models"):
-            report_lines.append("### Топ моделей по размеру\n")
-            report_lines.append("| Модель | Размер | Тип |\n")
+            report_lines.append("### Top models by size\n")
+            report_lines.append("| Model | Size | Type |\n")
             report_lines.append("|--------|--------|-----|\n")
             for model in ml_cache_results["models"][:10]:
                 report_lines.append(
@@ -88,38 +82,32 @@ def generate_markdown_report(
                 )
             report_lines.append("\n")
 
-    # Анализ зависимостей
     if dependency_results:
-        report_lines.append("## Анализ зависимостей\n")
+        report_lines.append("## Dependency Analysis\n")
         report_lines.append(
-            f"- **Проектов проверено:** {dependency_results.get('total_projects', 0)}\n"
+            f"- **Projects checked:** {dependency_results.get('total_projects', 0)}\n"
         )
+        report_lines.append(f"- **Conflicts:** {len(dependency_results.get('conflicts', []))}\n")
         report_lines.append(
-            f"- **Конфликтов найдено:** {len(dependency_results.get('conflicts', []))}\n"
+            f"- **Unused dependencies:** {len(dependency_results.get('unused_dependencies', []))}\n"
         )
-        report_lines.append(
-            f"- **Неиспользуемых зависимостей:** {len(dependency_results.get('unused_dependencies', []))}\n"
-        )
-        report_lines.append(
-            f"- **Устаревших зависимостей:** {len(dependency_results.get('outdated_dependencies', []))}\n"
-        )
+        n_outdated = len(dependency_results.get("outdated_dependencies", []))
+        report_lines.append(f"- **Outdated dependencies:** {n_outdated}\n")
         report_lines.append("\n")
 
         # Конфликты
         if dependency_results.get("conflicts"):
-            report_lines.append("### Конфликты зависимостей\n")
-            report_lines.append("| Проект | Сообщение |\n")
+            report_lines.append("### Dependency Conflicts\n")
+            report_lines.append("| Project | Message |\n")
             report_lines.append("|--------|-----------|\n")
             for conflict in dependency_results["conflicts"][:20]:
-                report_lines.append(
-                    f"| `{conflict['project']}` | {conflict['message']} |\n"
-                )
+                report_lines.append(f"| `{conflict['project']}` | {conflict['message']} |\n")
             report_lines.append("\n")
 
         # Неиспользуемые зависимости
         if dependency_results.get("unused_dependencies"):
-            report_lines.append("### Неиспользуемые зависимости\n")
-            report_lines.append("| Проект | Зависимость | Причина |\n")
+            report_lines.append("### Unused Dependencies\n")
+            report_lines.append("| Project | Dependency | Reason |\n")
             report_lines.append("|--------|-------------|----------|\n")
             for unused in dependency_results["unused_dependencies"][:20]:
                 report_lines.append(
@@ -127,31 +115,26 @@ def generate_markdown_report(
                 )
             report_lines.append("\n")
 
-    # Кэши
     if scan_results.get("caches"):
-        report_lines.append("## Кэши\n")
-        report_lines.append("| Путь | Размер |\n")
+        report_lines.append("## Caches\n")
+        report_lines.append("| Path | Size |\n")
         report_lines.append("|------|--------|\n")
         for cache in scan_results["caches"][:20]:
             report_lines.append(f"| `{cache['path']}` | {cache['size_formatted']} |\n")
         report_lines.append("\n")
 
-    # Остатки приложений
     if scan_results.get("orphaned_apps"):
-        report_lines.append("## Возможные остатки удаленных приложений\n")
-        report_lines.append("| Путь | Размер | Статус |\n")
+        report_lines.append("## Possible App Leftovers\n")
+        report_lines.append("| Path | Size | Status |\n")
         report_lines.append("|------|--------|--------|\n")
         for app in scan_results["orphaned_apps"][:20]:
-            status = (
-                "Возможно удалено" if app.get("possibly_orphaned") else "Приложение установлено"
-            )
+            status = "Possibly removed" if app.get("possibly_orphaned") else "App installed"
             report_lines.append(f"| `{app['path']}` | {app['size_formatted']} | {status} |\n")
         report_lines.append("\n")
 
-    # Скрытые файлы
     if scan_results.get("hidden_files"):
-        report_lines.append("## Большие скрытые файлы и директории\n")
-        report_lines.append("| Путь | Тип | Размер |\n")
+        report_lines.append("## Large Hidden Files\n")
+        report_lines.append("| Path | Type | Size |\n")
         report_lines.append("|------|-----|--------|\n")
         for hidden in scan_results["hidden_files"][:20]:
             report_lines.append(
@@ -159,82 +142,81 @@ def generate_markdown_report(
             )
         report_lines.append("\n")
 
-    # Артефакты проектов
     if scan_results.get("project_artifacts"):
-        report_lines.append("## Артефакты проектов\n")
-        report_lines.append("| Тип | Количество | Общий размер |\n")
+        report_lines.append("## Project Artifacts\n")
+        report_lines.append("| Type | Count | Total Size |\n")
         report_lines.append("|-----|------------|--------------|\n")
         for artifact in scan_results["project_artifacts"]:
-            report_lines.append(
-                f"| `{artifact['type']}` | {artifact['count']} | {artifact['total_size_formatted']} |\n",
-            )
+            t, c, s = artifact["type"], artifact["count"], artifact["total_size_formatted"]
+            report_lines.append(f"| `{t}` | {c} | {s} |\n")
         report_lines.append("\n")
 
-    # Безопасность
     if security_results.get("issues"):
-        report_lines.append("## Проблемы безопасности\n")
-        
-        # Группируем по уровню серьезности
+        report_lines.append("## Security Issues\n")
+
         high_issues = [i for i in security_results["issues"] if i.get("severity") == "high"]
         medium_issues = [i for i in security_results["issues"] if i.get("severity") == "medium"]
         low_issues = [i for i in security_results["issues"] if i.get("severity") == "low"]
-        
+
         if high_issues:
-            report_lines.append("### 🔴 Критические проблемы (high)\n")
-            report_lines.append("| Категория | Путь | Описание | Почему критично | Рекомендация |\n")
-            report_lines.append("|-----------|------|----------|-----------------|--------------|\n")
+            report_lines.append("### Critical (high)\n")
+            report_lines.append(
+                "| Category | Path | Description | Why critical | Recommendation |\n"
+            )
+            report_lines.append(
+                "|----------|------|-------------|--------------|----------------|\n"
+            )
             for issue in high_issues:
                 why_critical = ""
                 category_lower = issue.get("category", "").lower()
                 if "ssh" in category_lower:
-                    why_critical = "Неправильные права могут позволить злоумышленникам получить доступ к серверам и учетным записям"
+                    why_critical = "Wrong permissions may allow attackers to access servers"
                 elif "permission" in category_lower or "file" in category_lower:
-                    why_critical = "Слишком открытые права могут привести к утечке конфиденциальных данных"
+                    why_critical = "Overly open permissions may leak confidential data"
                 elif "sensitive" in category_lower:
-                    why_critical = "Файлы с секретами могут быть скомпрометированы при утечке данных"
+                    why_critical = "Files with secrets may be compromised in a data leak"
                 else:
-                    why_critical = "Требует немедленного внимания для предотвращения утечки данных или несанкционированного доступа"
-                
+                    why_critical = "Requires immediate attention to prevent data leak"
+
                 recommendation = issue.get("recommendation", "N/A")
                 report_lines.append(
-                    f"| {issue['category']} | `{issue['path']}` | {issue['description']} | {why_critical} | {recommendation} |\n",
-                )
-            report_lines.append("\n")
-        
-        if medium_issues:
-            report_lines.append("### 🟡 Средние проблемы (medium)\n")
-            report_lines.append("| Категория | Путь | Описание | Рекомендация |\n")
-            report_lines.append("|-----------|------|----------|--------------|\n")
-            for issue in medium_issues:
-                recommendation = issue.get("recommendation", "N/A")
-                report_lines.append(
-                    f"| {issue['category']} | `{issue['path']}` | {issue['description']} | {recommendation} |\n",
-                )
-            report_lines.append("\n")
-        
-        if low_issues:
-            report_lines.append("### 🟢 Низкие проблемы (low)\n")
-            report_lines.append("| Категория | Путь | Описание | Рекомендация |\n")
-            report_lines.append("|-----------|------|----------|--------------|\n")
-            for issue in low_issues:
-                recommendation = issue.get("recommendation", "N/A")
-                report_lines.append(
-                    f"| {issue['category']} | `{issue['path']}` | {issue['description']} | {recommendation} |\n",
+                    f"| {issue['category']} | `{issue['path']}` | {issue['description']} | "
+                    f"{why_critical} | {recommendation} |\n",
                 )
             report_lines.append("\n")
 
-    # Рекомендации по очистке
+        if medium_issues:
+            report_lines.append("### Medium\n")
+            report_lines.append("| Category | Path | Description | Recommendation |\n")
+            report_lines.append("|-----------|------|----------|--------------|\n")
+            for issue in medium_issues:
+                rec = issue.get("recommendation", "N/A")
+                cat, path, desc = issue["category"], issue["path"], issue["description"]
+                report_lines.append(f"| {cat} | `{path}` | {desc} | {rec} |\n")
+            report_lines.append("\n")
+
+        if low_issues:
+            report_lines.append("### Low\n")
+            report_lines.append("| Category | Path | Description | Recommendation |\n")
+            report_lines.append("|-----------|------|----------|--------------|\n")
+            for issue in low_issues:
+                rec = issue.get("recommendation", "N/A")
+                cat, path, desc = issue["category"], issue["path"], issue["description"]
+                report_lines.append(f"| {cat} | `{path}` | {desc} | {rec} |\n")
+            report_lines.append("\n")
+
     if cleanup_analysis.get("recommendations"):
-        report_lines.append("## Рекомендации по очистке\n")
+        report_lines.append("## Cleanup Recommendations\n")
         report_lines.append(
-            f"**Потенциально можно освободить:** {cleanup_analysis['total_reclaimable_gb']:.2f} GB\n\n",
+            f"**Potentially reclaimable:** {cleanup_analysis['total_reclaimable_gb']:.2f} GB\n\n",
         )
-        report_lines.append("| Тип | Путь | Размер | Риск | Описание |\n")
+        report_lines.append("| Type | Path | Size | Risk | Description |\n")
         report_lines.append("|-----|------|--------|------|----------|\n")
         for rec in cleanup_analysis["recommendations"][:30]:
             path = rec.get("path", rec.get("pattern", "N/A"))
+            size = rec.get("size_formatted", rec.get("total_size_formatted", "N/A"))
             report_lines.append(
-                f"| {rec['type']} | `{path}` | {rec.get('size_formatted', rec.get('total_size_formatted', 'N/A'))} | {rec['risk']} | {rec['description']} |\n",
+                f"| {rec['type']} | `{path}` | {size} | {rec['risk']} | {rec['description']} |\n"
             )
         report_lines.append("\n")
 
@@ -297,7 +279,7 @@ def save_report(
         ValueError: Если формат не поддерживается.
     """
     if format_type not in ["markdown", "json"]:
-        raise ValueError(f"Неподдерживаемый формат: {format_type}")
+        raise ValueError(f"Unsupported format: {format_type}")
 
     extension = ".md" if format_type == "markdown" else ".json"
     if not output_path.suffix == extension:
@@ -307,8 +289,7 @@ def save_report(
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with output_path.open("w", encoding="utf-8") as f:
             f.write(report_content)
-        logger.info(f"Отчет сохранен в {output_path}")
+        logger.info("Report saved to %s", output_path)
     except Exception as e:
-        logger.error(f"Ошибка при сохранении отчета: {e}")
+        logger.error("Error saving report: %s", e)
         raise
-

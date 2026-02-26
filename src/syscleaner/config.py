@@ -1,9 +1,8 @@
-"""Модуль конфигурации."""
+"""Configuration module."""
 
 import logging
 import os
 from pathlib import Path
-from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field
@@ -13,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class ScanConfig(BaseModel):
-    """Настройки сканирования."""
+    """Scan settings."""
 
     exclude_paths: list[str] = Field(
         default_factory=lambda: [
@@ -22,15 +21,15 @@ class ScanConfig(BaseModel):
             "~/Library/Photos/",
         ],
     )
-    min_size_mb: float = Field(default=10.0, description="Минимальный размер для отчета в MB")
-    check_security: bool = Field(default=True, description="Проверять безопасность")
-    check_project_artifacts: bool = Field(default=True, description="Проверять артефакты проектов")
-    check_dependencies: bool = Field(default=True, description="Проверять зависимости")
-    check_ml_cache: bool = Field(default=True, description="Проверять ML кэши")
+    min_size_mb: float = Field(default=10.0, description="Min size for report (MB)")
+    check_security: bool = Field(default=True, description="Check security")
+    check_project_artifacts: bool = Field(default=True, description="Check project artifacts")
+    check_dependencies: bool = Field(default=True, description="Check dependencies")
+    check_ml_cache: bool = Field(default=True, description="Check ML caches")
 
 
 class SecurityConfig(BaseModel):
-    """Настройки безопасности."""
+    """Security settings."""
 
     sensitive_patterns: list[str] = Field(
         default_factory=lambda: [
@@ -42,12 +41,12 @@ class SecurityConfig(BaseModel):
             "*api_key*",
         ],
     )
-    check_ssh_permissions: bool = Field(default=True, description="Проверять права SSH")
-    check_file_permissions: bool = Field(default=True, description="Проверять права файлов")
+    check_ssh_permissions: bool = Field(default=True, description="Check SSH permissions")
+    check_file_permissions: bool = Field(default=True, description="Check file permissions")
 
 
 class CleanupConfig(BaseModel):
-    """Настройки очистки."""
+    """Cleanup settings."""
 
     safe_to_delete_patterns: list[str] = Field(
         default_factory=lambda: [
@@ -61,7 +60,7 @@ class CleanupConfig(BaseModel):
 
 
 class Settings(BaseSettings):
-    """Основные настройки приложения."""
+    """Application settings."""
 
     scan: ScanConfig = Field(default_factory=ScanConfig)
     security: SecurityConfig = Field(default_factory=SecurityConfig)
@@ -75,24 +74,22 @@ class Settings(BaseSettings):
 
 def load_config(config_path: str | Path | None = None) -> Settings:
     """
-    Загрузить конфигурацию из файла и переменных окружения.
+    Load configuration from file and environment variables.
 
     Args:
-        config_path: Путь к config.yaml. Если None, ищет в текущей директории.
+        config_path: Path to config.yaml. If None, searches current directory.
 
     Returns:
-        Настроенный объект Settings.
+        Configured Settings instance.
 
     Raises:
-        FileNotFoundError: Если config.yaml не найден и не задан config_path.
-        ValidationError: Если конфигурация невалидна.
+        FileNotFoundError: If config.yaml not found and config_path not set.
+        ValidationError: If configuration is invalid.
     """
     if config_path is None:
-        # Ищем config.yaml в текущей директории или родительских
         current_dir = Path.cwd()
         config_path = current_dir / "config.yaml"
         if not config_path.exists():
-            # Пробуем найти в родительских директориях
             for parent in current_dir.parents:
                 potential_config = parent / "config.yaml"
                 if potential_config.exists():
@@ -104,7 +101,8 @@ def load_config(config_path: str | Path | None = None) -> Settings:
 
     if not config_path.exists():
         logger.warning(
-            f"config.yaml не найден по пути {config_path}. Используются значения по умолчанию.",
+            "config.yaml not found at %s. Using defaults.",
+            config_path,
         )
         return Settings()
 
@@ -112,18 +110,15 @@ def load_config(config_path: str | Path | None = None) -> Settings:
         with config_path.open(encoding="utf-8") as f:
             yaml_data = yaml.safe_load(f)
 
-        # Расширяем пути с ~
         if "scan" in yaml_data and "exclude_paths" in yaml_data["scan"]:
             yaml_data["scan"]["exclude_paths"] = [
                 os.path.expanduser(path) for path in yaml_data["scan"]["exclude_paths"]
             ]
 
-        # Создаем Settings с данными из YAML
         settings = Settings(**yaml_data)
-        logger.info(f"Конфигурация загружена из {config_path}")
+        logger.info("Config loaded from %s", config_path)
         return settings
 
     except Exception as e:
-        logger.error(f"Ошибка загрузки конфигурации из {config_path}: {e}")
+        logger.error("Config load error from %s: %s", config_path, e)
         raise
-

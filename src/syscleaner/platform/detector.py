@@ -1,7 +1,6 @@
 """Модуль определения платформы."""
 
 import platform
-import sys
 from enum import Enum
 
 
@@ -34,4 +33,3 @@ CURRENT_PLATFORM = detect_platform()
 IS_MACOS = CURRENT_PLATFORM == Platform.MACOS
 IS_LINUX = CURRENT_PLATFORM == Platform.LINUX
 IS_UNKNOWN = CURRENT_PLATFORM == Platform.UNKNOWN
-

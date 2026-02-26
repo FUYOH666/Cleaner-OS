@@ -269,4 +269,3 @@ class PlatformPaths:
 
         logger.info(f"Найдено {len(project_dirs)} директорий проектов")
         return project_dirs
-

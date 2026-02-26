@@ -1,7 +1,6 @@
 """Модуль сканирования кэшей."""
 
 import logging
-from pathlib import Path
 from typing import Any
 
 from syscleaner.platform.paths import PlatformPaths
@@ -55,4 +54,3 @@ def scan_caches(paths: PlatformPaths, exclude_paths: list[str]) -> list[dict[str
         logger.error(f"Ошибка при сканировании кэшей: {e}")
 
     return sorted(results, key=lambda x: x["size_bytes"], reverse=True)
-

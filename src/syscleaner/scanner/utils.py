@@ -36,9 +36,9 @@ def format_size(size_bytes: int) -> tuple[float, str]:
     Returns:
         Кортеж (размер, единица измерения).
     """
+    value: float = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size_bytes < 1024.0:
-            return (size_bytes, unit)
-        size_bytes /= 1024.0
-    return (size_bytes, "PB")
-
+        if value < 1024.0:
+            return (value, unit)
+        value /= 1024.0
+    return (value, "PB")

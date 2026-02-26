@@ -75,11 +75,8 @@ def find_unused_dependencies(project_path: Path) -> list[dict[str, Any]]:
         return unused
 
     try:
-        # Парсим pyproject.toml для получения зависимостей
-        try:
-            import tomllib  # Python 3.11+
-        except ImportError:
-            import tomli as tomllib  # Python < 3.11
+        # Parse pyproject.toml for dependencies (Python 3.12+ has tomllib in stdlib)
+        import tomllib
 
         with pyproject_toml.open("rb") as f:
             data = tomllib.load(f)
@@ -101,8 +98,8 @@ def find_unused_dependencies(project_path: Path) -> list[dict[str, Any]]:
                 # Простой парсинг импортов (можно улучшить через AST)
                 for line in content.splitlines():
                     if line.strip().startswith("import ") or line.strip().startswith("from "):
-                        # Извлекаем имя модуля
-                        import_part = line.strip().split()[1] if "import" in line else line.strip().split()[1]
+                        parts = line.strip().split()
+                        import_part = parts[1] if len(parts) > 1 else ""
                         module_name = import_part.split(".")[0]
                         imports.add(module_name)
             except Exception:
@@ -117,7 +114,8 @@ def find_unused_dependencies(project_path: Path) -> list[dict[str, Any]]:
             # Проверяем, используется ли зависимость
             is_used = False
             for imp in imports:
-                if imp.lower() == dep_name_normalized or imp.lower().startswith(dep_name_normalized):
+                imp_lower = imp.lower()
+                if imp_lower == dep_name_normalized or imp_lower.startswith(dep_name_normalized):
                     is_used = True
                     break
 
@@ -126,7 +124,7 @@ def find_unused_dependencies(project_path: Path) -> list[dict[str, Any]]:
                     {
                         "project": str(project_path),
                         "dependency": dep_name,
-                        "reason": "Не найдено использование в коде",
+                        "reason": "No usage found in code",
                     },
                 )
 
@@ -227,4 +225,3 @@ def analyze_python_dependencies(projects_dirs: list[Path]) -> dict[str, Any]:
         "unused_dependencies": all_unused,
         "outdated_dependencies": all_outdated,
     }
-

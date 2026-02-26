@@ -1,4 +1,4 @@
-"""Модуль анализа и очистки мусора."""
+"""Cleanup analysis module."""
 
 import logging
 from typing import Any
@@ -30,10 +30,11 @@ def analyze_cleanup_opportunities(
         unused_size_gb = ml_cache_results.get("unused_size_gb", 0)
         if unused_size_gb > 0:
             unused_size_mb = unused_size_gb * 1024
+            n_unused = ml_cache_results.get("unused_models_count", 0)
             recommendations.append(
                 {
                     "type": "ml_cache",
-                    "description": f"Неиспользуемые ML модели ({ml_cache_results.get('unused_models_count', 0)} штук)",
+                    "description": f"Unused ML models ({n_unused})",
                     "size_mb": unused_size_mb,
                     "size_formatted": f"{unused_size_gb:.2f} GB",
                     "action": "delete",
@@ -55,7 +56,7 @@ def analyze_cleanup_opportunities(
                         "size_formatted": cache["size_formatted"],
                         "action": "delete",
                         "risk": "low",
-                        "description": f"Большой кэш приложения {cache['name']}",
+                        "description": f"Large app cache: {cache['name']}",
                     },
                 )
                 total_reclaimable_mb += cache["size_mb"]
@@ -72,7 +73,7 @@ def analyze_cleanup_opportunities(
                     "total_size_formatted": artifact["total_size_formatted"],
                     "action": "delete",
                     "risk": "low",
-                    "description": f"{artifact['count']} артефактов типа {artifact['type']}",
+                    "description": f"{artifact['count']} artifacts of type {artifact['type']}",
                 },
             )
             total_reclaimable_mb += artifact["total_size_mb"]
@@ -88,7 +89,7 @@ def analyze_cleanup_opportunities(
                 "size_formatted": scan_results["trash"]["size_formatted"],
                 "action": "empty",
                 "risk": "low",
-                "description": "Очистка корзины",
+                "description": "Empty trash",
             },
         )
         total_reclaimable_mb += scan_results["trash"]["size_mb"]
@@ -106,7 +107,7 @@ def analyze_cleanup_opportunities(
                         "size_formatted": log["size_formatted"],
                         "action": "delete",
                         "risk": "low",
-                        "description": f"Большой лог {log['name']}",
+                        "description": f"Large log: {log['name']}",
                     },
                 )
                 total_reclaimable_mb += log["size_mb"]
@@ -117,4 +118,3 @@ def analyze_cleanup_opportunities(
         "total_reclaimable_gb": total_reclaimable_mb / 1024,
         "total_items": len(recommendations),
     }
-

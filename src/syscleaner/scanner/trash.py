@@ -1,7 +1,6 @@
 """Модуль сканирования корзины."""
 
 import logging
-from pathlib import Path
 from typing import Any
 
 from syscleaner.platform.paths import PlatformPaths
@@ -41,4 +40,3 @@ def scan_trash(paths: PlatformPaths) -> dict[str, Any]:
     except (OSError, PermissionError) as e:
         logger.error(f"Ошибка при сканировании корзины: {e}")
         return {"path": str(trash_dir), "size_bytes": 0, "size_mb": 0.0, "count": 0}
-

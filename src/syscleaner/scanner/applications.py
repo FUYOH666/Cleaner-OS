@@ -1,7 +1,6 @@
 """Модуль сканирования остатков удаленных приложений."""
 
 import logging
-from pathlib import Path
 from typing import Any
 
 from syscleaner.platform import IS_LINUX, IS_MACOS
@@ -67,4 +66,3 @@ def scan_application_support(paths: PlatformPaths) -> list[dict[str, Any]]:
         logger.error(f"Ошибка при сканировании поддержки приложений: {e}")
 
     return sorted(results, key=lambda x: x["size_bytes"], reverse=True)
-

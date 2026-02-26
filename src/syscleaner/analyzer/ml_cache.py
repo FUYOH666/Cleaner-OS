@@ -1,7 +1,6 @@
 """Модуль анализа кэша ML моделей."""
 
 import logging
-import os
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -336,6 +335,7 @@ def scan_ml_cache(paths: PlatformPaths) -> dict[str, Any]:
         "unused_models_count": len(unused_models),
         "unused_size_bytes": unused_size,
         "unused_size_gb": unused_size / (1024 * 1024 * 1024),
-        "models": [model.to_dict() for model in sorted(all_models, key=lambda x: x.size_bytes, reverse=True)],
+        "models": [
+            m.to_dict() for m in sorted(all_models, key=lambda x: x.size_bytes, reverse=True)
+        ],
     }
-

@@ -217,4 +217,3 @@ def get_snap_apps() -> set[str]:
         pass
 
     return apps
-

@@ -36,4 +36,3 @@ def get_launch_agents_paths() -> list[Path]:
         Path("/System") / "Library" / "LaunchDaemons",
     ]
     return [p for p in paths if p.exists()]
-

@@ -1,4 +1,4 @@
-"""Модуль проверки безопасности (кроссплатформенный)."""
+"""Cross-platform security check module."""
 
 import logging
 import stat
@@ -146,8 +146,8 @@ def check_ssh_permissions(paths: PlatformPaths) -> list[SecurityIssue]:
                     severity="high",
                     category="ssh_permissions",
                     path=str(ssh_dir),
-                    description=f"Неправильные права на директорию .ssh: {dir_mode} (должно быть drwx------)",
-                    recommendation="Выполните: chmod 700 ~/.ssh",
+                    description=f"Wrong .ssh dir permissions: {dir_mode} (expected drwx------)",
+                    recommendation="Run: chmod 700 ~/.ssh",
                 ),
             )
     except OSError as e:
@@ -168,8 +168,8 @@ def check_ssh_permissions(paths: PlatformPaths) -> list[SecurityIssue]:
                             severity="high",
                             category="ssh_permissions",
                             path=str(key_file),
-                            description=f"Неправильные права на приватный ключ: {file_mode} (должно быть -rw-------)",
-                            recommendation=f"Выполните: chmod 600 {key_file}",
+                            description=f"Wrong key perms: {file_mode} (expected -rw-------)",
+                            recommendation=f"Run: chmod 600 {key_file}",
                         ),
                     )
             except OSError as e:
@@ -203,18 +203,17 @@ def check_file_permissions(file_path: Path) -> SecurityIssue | None:
             sensitive_names = ["secret", "password", "credential", "token", "api_key"]
 
             file_name_lower = file_path.name.lower()
-            is_sensitive = (
-                any(file_name_lower.endswith(ext) for ext in sensitive_extensions)
-                or any(name in file_name_lower for name in sensitive_names)
-            )
+            is_sensitive = any(
+                file_name_lower.endswith(ext) for ext in sensitive_extensions
+            ) or any(name in file_name_lower for name in sensitive_names)
 
             if is_sensitive:
                 return SecurityIssue(
                     severity="high",
                     category="file_permissions",
                     path=str(file_path),
-                    description=f"Секретный файл доступен для чтения всем: {file_mode}",
-                    recommendation=f"Выполните: chmod 600 {file_path}",
+                    description=f"Sensitive file world-readable: {file_mode}",
+                    recommendation=f"Run: chmod 600 {file_path}",
                 )
     except OSError:
         pass
@@ -323,4 +322,3 @@ def scan_security(
         "total_issues": len(issues_dict),
         "high_severity_issues": len([i for i in issues_dict if i["severity"] == "high"]),
     }
-

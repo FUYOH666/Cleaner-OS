@@ -15,4 +15,3 @@ __all__ = [
     "scan_logs",
     "scan_trash",
 ]
-
