@@ -61,10 +61,10 @@ This is an open-source project. You can run it yourself.
 
 Or I can deploy, customize, and integrate it for your company in **2 weeks**.
 
-**Fixed price: $2,000** — includes data setup, customization, deployment, and 30 days of support.
+**Fixed price: $2,000** — includes setup, customization, deployment, and 30 days of support.
 
-- **Email:** iamfuyoh@gmail.com
-- **Telegram:** [@ScanovichAI](https://t.me/ScanovichAI)
+→ **Email:** iamfuyoh@gmail.com  
+→ **Telegram:** [@ScanovichAI](https://t.me/ScanovichAI)
 
 ---
 
