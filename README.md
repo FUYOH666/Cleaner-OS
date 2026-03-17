@@ -1,53 +1,44 @@
 # System Cleaner
 
+**Reclaim dozens of gigabytes and fix security risks — one scan instead of manual hunting.**
+
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/FUYOH666/Cleaner-OS)
 
-Universal CLI for system cleanup and audit. Analyzes ML caches, Python dependencies, application leftovers, and security on macOS and Linux.
+---
 
-## Problems Solved
+## The Problem
 
-- Unused ML models (Hugging Face, PyTorch, TensorFlow) consuming disk space
-- Dependency conflicts in Python projects
-- Removed application leftovers
-- Security issues (file permissions, secrets in code)
-- Build artifacts and unused dependencies
+Your disk fills up with caches and old ML models — you don't know what's safe to delete. Dependency conflicts and outdated packages take hours to track down manually. Sensitive files and wrong SSH permissions hide in plain sight, with no clear warning until it's too late.
 
-## Features
+## The Solution
 
-- System scanning: caches, logs, application leftovers
-- ML cache analysis: Hugging Face, PyTorch, TensorFlow
-- Dependency analysis: conflicts, unused, outdated
-- Security checks: permissions, SSH keys, sensitive files
-- Cleanup recommendations with size estimates
-- Cross-platform: macOS and Linux
-- Reports: Markdown and JSON
+One scan finds caches, unused ML models, project artifacts, and security issues. You get recommendations with size estimates — see exactly how much you can reclaim. Reports in Markdown or JSON for automation and compliance.
 
-## Requirements
+## Results
 
-- Python 3.12+ (3.12, 3.13)
-- uv (installed automatically)
-- macOS or Linux
+- **Before:** Manual hunting through `~/.cache`, `~/Library/Caches`, Hugging Face hub — hours spent, uncertainty about what to delete.
+- **After:** Single command, structured report. Typical ML workstations: 50–100+ GB reclaimable. Dependency conflicts and security issues surfaced in minutes.
 
-## Installation
+---
+
+## Quick Start
 
 ```bash
 git clone https://github.com/FUYOH666/Cleaner-OS.git
 cd Cleaner-OS
 uv sync
-uv run python -m syscleaner health
+uv run syscleaner scan --all
 ```
 
 Run directly: `syscleaner` or `system-cleaner`
-
-## Usage
 
 ```bash
 # Full scan
 syscleaner scan --all
 
-# Categories
+# By category
 syscleaner scan --caches
 syscleaner scan --security
 syscleaner scan --projects
@@ -62,49 +53,43 @@ syscleaner report --format markdown --output report.md --from-scan results.json
 syscleaner health
 ```
 
-## Configuration
+---
 
-Copy `config.yaml.example` to `config.yaml` and edit. Optional; defaults work out of the box.
+## Deploy This For Your Business
 
-```yaml
-scan:
-  exclude_paths: [~/Library/Mail/, ~/Library/Messages/, ...]
-  min_size_mb: 10
-  check_security: true
-  check_project_artifacts: true
-  check_dependencies: true
-  check_ml_cache: true
+This is an open-source project. You can run it yourself.
 
-security:
-  sensitive_patterns: ["*.env", "*credentials*", ...]
-  check_ssh_permissions: true
-  check_file_permissions: true
+Or I can deploy, customize, and integrate it for your company in **2 weeks**.
 
-cleanup:
-  safe_to_delete_patterns: ["**/__pycache__", "**/.DS_Store", ...]
-```
+**Fixed price: $2,000** — includes data setup, customization, deployment, and 30 days of support.
 
-## What It Scans
+- **Email:** iamfuyoh@gmail.com
+- **Telegram:** [@ScanovichAI](https://t.me/ScanovichAI)
 
-1. **Caches** — macOS: `~/Library/Caches/`, Linux: `~/.cache/`
-2. **App leftovers** — Compare Application Support with installed apps
-3. **Security** — SSH permissions, sensitive files, world-readable configs
-4. **Hidden files** — Large hidden files/dirs in home
-5. **Project artifacts** — `__pycache__`, `node_modules`, `dist`, `build`
-6. **ML caches** — Hugging Face, PyTorch, TensorFlow (unused models >30 days)
-7. **Dependencies** — Conflicts, unused, outdated via `uv pip check`
+---
 
-## Report Formats
+## Tech Stack
 
-**Markdown:** Summary, ML caches, dependencies, caches, security, cleanup recommendations.
+- **Python 3.12+** with uv
+- **Platforms:** macOS, Linux
 
-**JSON:** Structured data for automation.
+**What it scans:**
 
-## Security
+1. Caches — `~/Library/Caches/` (macOS), `~/.cache/` (Linux)
+2. App leftovers — Application Support vs installed apps
+3. Security — SSH permissions, sensitive files, world-readable configs
+4. Hidden files — Large hidden files/dirs in home
+5. Project artifacts — `__pycache__`, `node_modules`, `dist`, `build`
+6. ML caches — Hugging Face, PyTorch, TensorFlow (unused models >30 days)
+7. Dependencies — Conflicts, unused, outdated via `uv pip check`
 
-- No automatic deletions; analysis and recommendations only
-- Fail-fast on config errors
-- Path validation, structured logging
+**Configuration:** Copy `config.yaml.example` to `config.yaml`. Optional; defaults work out of the box.
+
+**Reports:** Markdown (summary, recommendations) or JSON (automation).
+
+**Security:** No automatic deletions — analysis and recommendations only. Fail-fast on config errors.
+
+---
 
 ## Contributing
 
