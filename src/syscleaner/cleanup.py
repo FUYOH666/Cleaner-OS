@@ -1,9 +1,8 @@
-"""Cleanup analysis module."""
+"""Cleanup analysis — backwards-compatible wrapper."""
 
-import logging
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from syscleaner.plan_builder import legacy_cleanup_to_findings
 
 
 def analyze_cleanup_opportunities(
@@ -12,20 +11,13 @@ def analyze_cleanup_opportunities(
     safe_patterns: list[str] | None = None,
 ) -> dict[str, Any]:
     """
-    Проанализировать возможности очистки.
+    Analyze cleanup opportunities from scan results.
 
-    Args:
-        scan_results: Результаты сканирования.
-        ml_cache_results: Результаты анализа ML кэшей.
-        safe_patterns: Паттерны безопасных для удаления файлов.
-
-    Returns:
-        Словарь с рекомендациями по очистке.
+    Returns legacy dict format for reports; findings also available via ScanBundle.
     """
     recommendations: list[dict[str, Any]] = []
     total_reclaimable_mb = 0.0
 
-    # Анализ ML кэшей
     if ml_cache_results:
         unused_size_gb = ml_cache_results.get("unused_size_gb", 0)
         if unused_size_gb > 0:
@@ -43,10 +35,9 @@ def analyze_cleanup_opportunities(
             )
             total_reclaimable_mb += unused_size_mb
 
-    # Анализ кэшей
     if "caches" in scan_results:
         for cache in scan_results["caches"]:
-            if cache["size_mb"] >= 50:  # Кэши больше 50MB
+            if cache["size_mb"] >= 50:
                 recommendations.append(
                     {
                         "type": "cache",
@@ -61,7 +52,6 @@ def analyze_cleanup_opportunities(
                 )
                 total_reclaimable_mb += cache["size_mb"]
 
-    # Анализ артефактов проектов
     if "project_artifacts" in scan_results:
         for artifact in scan_results["project_artifacts"]:
             recommendations.append(
@@ -72,14 +62,13 @@ def analyze_cleanup_opportunities(
                     "total_size_mb": artifact["total_size_mb"],
                     "total_size_formatted": artifact["total_size_formatted"],
                     "action": "delete",
-                    "risk": "low",
+                    "risk": "medium",
                     "description": f"{artifact['count']} artifacts of type {artifact['type']}",
                 },
             )
             total_reclaimable_mb += artifact["total_size_mb"]
 
-    # Анализ корзины
-    if "trash" in scan_results and scan_results["trash"]["size_mb"] > 0:
+    if "trash" in scan_results and scan_results["trash"].get("size_mb", 0) > 0:
         recommendations.append(
             {
                 "type": "trash",
@@ -94,10 +83,9 @@ def analyze_cleanup_opportunities(
         )
         total_reclaimable_mb += scan_results["trash"]["size_mb"]
 
-    # Анализ логов
     if "logs" in scan_results:
         for log in scan_results["logs"]:
-            if log["size_mb"] >= 100:  # Логи больше 100MB
+            if log["size_mb"] >= 100:
                 recommendations.append(
                     {
                         "type": "log",
@@ -118,3 +106,6 @@ def analyze_cleanup_opportunities(
         "total_reclaimable_gb": total_reclaimable_mb / 1024,
         "total_items": len(recommendations),
     }
+
+
+__all__ = ["analyze_cleanup_opportunities", "legacy_cleanup_to_findings"]

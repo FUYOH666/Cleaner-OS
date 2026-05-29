@@ -1,104 +1,27 @@
-# Скрипты для System Cleaner
+# Optional helper scripts
 
-Этот каталог содержит вспомогательные скрипты для работы с System Cleaner.
+These are **optional** shell examples. Core functionality lives in the `syscleaner` CLI.
 
-## Доступные скрипты
+Prefer:
 
-### `system_health_check.sh.example`
-
-Универсальный скрипт для проверки состояния системы, оптимизированной для ML/AI разработки.
-
-**Функции:**
-- Проверка GPU (NVIDIA, температура, память, использование)
-- Проверка CPU (ядра, использование, governor)
-- Проверка памяти (RAM, swap)
-- Проверка диска (использование, свободное место)
-- **Проверка Wi-Fi** (состояние устройства, подключение, доступность интернета)
-- Проверка сервисов (SSH, Docker, nvidia-persistenced)
-- Проверка Python/CUDA окружения
-- Проверка Docker GPU поддержки
-
-**Использование:**
 ```bash
-# Скопируйте example файл
+syscleaner scan --all
+syscleaner health
+```
+
+## Included examples
+
+| File | Purpose |
+|------|---------|
+| `system_health_check.sh.example` | GPU, CPU, memory, disk, Docker (macOS/Linux) |
+| `backup_configs.sh.example` | Backup SSH, shell, and `config.yaml` |
+
+## Usage
+
+```bash
 cp scripts/system_health_check.sh.example scripts/system_health_check.sh
-
-# Сделайте исполняемым
 chmod +x scripts/system_health_check.sh
-
-# Запустите
 ./scripts/system_health_check.sh
 ```
 
-**Особенности:**
-- Работает на macOS и Linux
-- Использует относительные пути (не зависит от местоположения)
-- Автоматически определяет платформу
-
-### `backup_configs.sh.example`
-
-Скрипт для создания резервных копий критичных конфигураций системы.
-
-**Функции:**
-- Резервное копирование SSH конфигурации
-- Резервное копирование shell конфигурации (.bashrc, .profile, .zshrc)
-- Резервное копирование Cleaner-OS конфигурации
-- Создание README с инструкциями по восстановлению
-
-**Использование:**
-```bash
-# Скопируйте example файл
-cp scripts/backup_configs.sh.example scripts/backup_configs.sh
-
-# Сделайте исполняемым
-chmod +x scripts/backup_configs.sh
-
-# Запустите
-./scripts/backup_configs.sh
-```
-
-**Особенности:**
-- Автоматическое создание директории для бэкапов
-- Таймстамп в имени бэкапа
-- Относительные пути к проекту
-
-### `wifi_reconnect.sh` и Wi-Fi мониторинг
-
-Система автоматического переподключения Wi-Fi для обеспечения стабильного uptime.
-
-**Компоненты:**
-- `wifi_reconnect.sh` - скрипт проверки и переподключения Wi-Fi
-- `wifi-monitor.service` - systemd service для выполнения переподключения
-- `wifi-monitor.timer` - systemd timer (запуск каждые 2 минуты)
-- `install_wifi_monitor.sh` - скрипт автоматической установки
-
-**Функции:**
-- Автоматическая проверка состояния Wi-Fi каждые 2 минуты
-- Обнаружение отключений (rfkill, разрыв соединения)
-- Автоматическое переподключение при обнаружении проблем
-- Проверка доступности интернета (ping 8.8.8.8)
-- Логирование всех событий
-
-**Использование:**
-```bash
-# Установка (требует sudo)
-sudo ./scripts/install_wifi_monitor.sh
-
-# Ручной запуск для теста
-./scripts/wifi_reconnect.sh
-
-# Просмотр логов
-sudo journalctl -u wifi-monitor.service -f
-tail -f logs/wifi_reconnect.log
-```
-
-**Документация:**
-См. [WIFI_SETUP.md](WIFI_SETUP.md) для подробных инструкций по установке и настройке.
-
-## Примечания
-
-- Все скрипты имеют суффикс `.example` в репозитории для безопасности
-- Перед использованием скопируйте `.example` файл и адаптируйте под свои нужды
-- Скрипты используют относительные пути и работают из любой директории
-- Скрипты проверяют наличие команд перед выполнением (fail-safe)
-
+Copy `.example` files before editing. Do not commit personalized copies with secrets or host-specific paths.

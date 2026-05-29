@@ -1,3 +1,3 @@
-"""System Cleaner - универсальный инструмент для очистки и аудита системы."""
+"""System Cleaner — trusted audit and tiered cleanup for macOS and Linux."""
 
-__version__ = "0.2.0"
+__version__ = "1.0.0"

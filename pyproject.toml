@@ -1,7 +1,7 @@
 [project]
 name = "syscleaner"
-version = "0.3.0"
-description = "Universal CLI for system cleanup and audit (macOS and Linux)"
+version = "1.0.0"
+description = "Trusted audit and tiered cleanup for dev workstations (macOS and Linux)"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
 license = {text = "MIT"}
@@ -20,9 +20,14 @@ keywords = [
     "pytorch",
     "dependencies",
     "dependency-analysis",
+    "uv",
+    "cursor",
+    "disk-space",
+    "developer-tools",
+    "sarif",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: MIT License",
@@ -77,5 +82,7 @@ pythonPlatform = "Linux"
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "ruff>=0.9.0",
+    "pyright>=1.1.400",
 ]
 

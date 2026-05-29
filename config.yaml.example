@@ -1,6 +1,24 @@
 # System Cleaner configuration
 # Copy this file to config.yaml and adapt for your system
 
+# Policy profile: default | ml-workstation | ios-dev | minimal
+profile: default
+
+recognizers:
+  enabled:
+    - uv_cache
+    - cursor_ide
+    - hf_hub
+    - ollama
+    - playwright
+    - xcode_derived
+    - xcode_archives
+    - npm_cache
+    - homebrew_cache
+    - pip_cache
+    - orphaned_app_support
+    - docker_cache
+
 scan:
   # Paths to exclude from scanning (use ~ for home directory)
   exclude_paths:

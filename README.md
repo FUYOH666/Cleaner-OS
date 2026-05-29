@@ -1,106 +1,135 @@
-# System Cleaner
+# System Cleaner (syscleaner)
 
-**Reclaim dozens of gigabytes and fix security risks — one scan instead of manual hunting.**
+**Trusted audit and tiered cleanup for developer workstations — macOS and Linux.**
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/FUYOH666/Cleaner-OS)
+[![CI](https://github.com/FUYOH666/Cleaner-OS/actions/workflows/ci.yml/badge.svg)](https://github.com/FUYOH666/Cleaner-OS/actions/workflows/ci.yml)
+
+One scan surfaces caches, AI-era IDE junk, ML models, dependency issues, and security risks. You get structured reports and an optional **safe apply** path that prefers official tools (`uv`, `hf`, `brew`) over blind `rm`.
 
 ---
 
-## The Problem
+## Why this exists
 
-Your disk fills up with caches and old ML models — you don't know what's safe to delete. Dependency conflicts and outdated packages take hours to track down manually. Sensitive files and wrong SSH permissions hide in plain sight, with no clear warning until it's too late.
+| Pain | What syscleaner does |
+|------|----------------------|
+| Disk full of opaque caches | Recognizers for uv, Cursor, HF, Ollama, Xcode, npm, … |
+| Unsure what is safe to delete | Risk tiers: `safe` / `moderate` / `risky` + dry-run by default |
+| Secrets and SSH misconfigurations | Security audit + SARIF export for CI |
+| ML models eating tens of GB | HF / PyTorch / TensorFlow cache analysis |
+| Broken Python deps | `uv pip check` across discovered projects |
 
-## The Solution
+**Compared to generic cleaners** ([CleanMyMac](https://macpaw.com/cleanmymac), OnyX): dev-specific paths and audit-first workflow.
 
-One scan finds caches, unused ML models, project artifacts, and security issues. You get recommendations with size estimates — see exactly how much you can reclaim. Reports in Markdown or JSON for automation and compliance.
-
-## Results
-
-- **Before:** Manual hunting through `~/.cache`, `~/Library/Caches`, Hugging Face hub — hours spent, uncertainty about what to delete.
-- **After:** Single command, structured report. Typical ML workstations: 50–100+ GB reclaimable. Dependency conflicts and security issues surfaced in minutes.
+**Compared to dev-only tools** ([devpurge](https://github.com/sogadaiki/devpurge), [diskard](https://github.com/connectwithprakash/diskard)): adds **security + dependency + ML** analysis and SARIF, not only disk reclaim.
 
 ---
 
-## Quick Start
+## Quick start
 
 ```bash
 git clone https://github.com/FUYOH666/Cleaner-OS.git
 cd Cleaner-OS
 uv sync
-uv run syscleaner scan --all
+uv run syscleaner scan --all --save-results scan.json
+uv run syscleaner plan --from-scan scan.json
+uv run syscleaner apply --from-scan scan.json --dry-run
 ```
 
-Run directly: `syscleaner` or `system-cleaner`
+Install as a tool:
 
 ```bash
-# Full scan
-syscleaner scan --all
-
-# By category
-syscleaner scan --caches
-syscleaner scan --security
-syscleaner scan --projects
-syscleaner scan --dependencies
-syscleaner scan --ml-cache
-
-# Save and report
-syscleaner scan --all --save-results results.json
-syscleaner report --format markdown --output report.md --from-scan results.json
-
-# Health check
+uv tool install git+https://github.com/FUYOH666/Cleaner-OS.git
 syscleaner health
 ```
 
 ---
 
-## Deploy This For Your Business
+## Commands
 
-This is an open-source project. You can run it yourself.
+```bash
+# Scan
+syscleaner scan --all
+syscleaner scan --caches --security --ml-cache --dependencies --projects
 
-Or I can deploy, customize, and integrate it for your company in **2 weeks**.
+# Reports
+syscleaner scan --all --save-results scan.json
+syscleaner report -f markdown -o report.md --from-scan scan.json
+syscleaner export-sarif --from-scan scan.json -o results.sarif
 
-**Free consultation** — tell me your setup, I'll tell you if it fits and how fast we can move.
+# Cleanup (dry-run default)
+syscleaner plan --from-scan scan.json
+syscleaner plan --from-scan scan.json --target-gb 20
+syscleaner apply --from-scan scan.json --dry-run
+syscleaner apply --from-scan scan.json --tier safe --execute --yes
 
-→ **Email:** iamfuyoh@gmail.com  
-→ **Telegram:** [@ScanovichAI](https://t.me/ScanovichAI)
+# Health / schema
+syscleaner health
+syscleaner healthz
+syscleaner export-schema -o scan-bundle.schema.json
+
+# Profiles (in config.yaml): default | ml-workstation | ios-dev | minimal
+```
+
+Aliases: `system-cleaner`
 
 ---
 
-## Tech Stack
+## Safety model
 
-- **Python 3.12+** with uv
-- **Platforms:** macOS, Linux
+1. **Scan** never deletes.
+2. **`apply`** defaults to **dry-run**.
+3. **`--tier safe`** limits to low-risk actions (e.g. `uv cache prune`).
+4. **`--allow-risky`** required for `node_modules` and similar.
+5. Missing CLI binaries → logged as manual steps, not silent failure.
 
-**What it scans:**
+See [docs/PRODUCT.md](docs/PRODUCT.md).
 
-1. Caches — `~/Library/Caches/` (macOS), `~/.cache/` (Linux)
-2. App leftovers — Application Support vs installed apps
-3. Security — SSH permissions, sensitive files, world-readable configs
-4. Hidden files — Large hidden files/dirs in home
-5. Project artifacts — `__pycache__`, `node_modules`, `dist`, `build`
-6. ML caches — Hugging Face, PyTorch, TensorFlow (unused models >30 days)
-7. Dependencies — Conflicts, unused, outdated via `uv pip check`
+---
 
-**Configuration:** Copy `config.yaml.example` to `config.yaml`. Optional; defaults work out of the box.
+## Configuration
 
-**Reports:** Markdown (summary, recommendations) or JSON (automation).
+```bash
+cp config.yaml.example config.yaml
+```
 
-**Security:** No automatic deletions — analysis and recommendations only. Fail-fast on config errors.
+Enable/disable recognizers, excludes, and security patterns in YAML. See [config.yaml.example](config.yaml.example).
+
+---
+
+## Automation
+
+- Weekly **scan + report** (no auto-delete): [examples/com.syscleaner.weekly.plist](examples/com.syscleaner.weekly.plist)
+- CI security: `syscleaner export-sarif` → upload to GitHub Code Scanning
+- Migrating from shell scripts: [docs/migration-from-cleanmac.md](docs/migration-from-cleanmac.md)
+
+---
+
+## Also see (ecosystem)
+
+- [devpurge](https://github.com/sogadaiki/devpurge) — macOS dev cache purge
+- [diskard](https://github.com/connectwithprakash/diskard) — recognizer-based cleanup
+- [mac-cleanup](https://github.com/Yurzs/mac-cleanup) — interactive macOS cleanup
 
 ---
 
 ## Contributing
 
-1. Fork, create branch, make changes
-2. Run `uv run ruff check .`, `uv run pyright`, `uv run pytest`
-3. Open Pull Request
+1. Fork and branch
+2. `uv sync --all-groups && uv run ruff check . && uv run pytest`
+3. Open a PR
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Professional support
+
+Optional deployment and customization: [docs/COMMERCIAL.md](docs/COMMERCIAL.md).
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
 
 ## Author
 
-Aleksandr Mordvinov — [GitHub](https://github.com/FUYOH666) | [scanovich.ai](https://scanovich.ai)
+[Aleksandr Mordvinov](https://github.com/FUYOH666) · [scanovich.ai](https://scanovich.ai)

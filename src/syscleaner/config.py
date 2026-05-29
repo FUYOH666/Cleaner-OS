@@ -8,6 +8,8 @@ import yaml
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from syscleaner.profiles import merge_profile
+
 logger = logging.getLogger(__name__)
 
 
@@ -59,12 +61,35 @@ class CleanupConfig(BaseModel):
     )
 
 
+class RecognizersConfig(BaseModel):
+    """Recognizer plugin settings."""
+
+    enabled: list[str] = Field(
+        default_factory=lambda: [
+            "uv_cache",
+            "cursor_ide",
+            "hf_hub",
+            "ollama",
+            "playwright",
+            "xcode_derived",
+            "xcode_archives",
+            "npm_cache",
+            "homebrew_cache",
+            "pip_cache",
+            "orphaned_app_support",
+            "docker_cache",
+        ],
+    )
+
+
 class Settings(BaseSettings):
     """Application settings."""
 
+    profile: str = Field(default="default", description="Policy profile name")
     scan: ScanConfig = Field(default_factory=ScanConfig)
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     cleanup: CleanupConfig = Field(default_factory=CleanupConfig)
+    recognizers: RecognizersConfig = Field(default_factory=RecognizersConfig)
 
     model_config = SettingsConfigDict(
         env_nested_delimiter="__",
@@ -115,8 +140,10 @@ def load_config(config_path: str | Path | None = None) -> Settings:
                 os.path.expanduser(path) for path in yaml_data["scan"]["exclude_paths"]
             ]
 
+        profile_name = yaml_data.get("profile", "default")
+        yaml_data = merge_profile(yaml_data, profile_name)
         settings = Settings(**yaml_data)
-        logger.info("Config loaded from %s", config_path)
+        logger.info("Config loaded from %s (profile=%s)", config_path, settings.profile)
         return settings
 
     except Exception as e:

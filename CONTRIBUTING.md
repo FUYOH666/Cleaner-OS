@@ -4,10 +4,7 @@ Thank you for your interest in contributing to Cleaner-OS! This document provide
 
 ## Code of Conduct
 
-- Be respectful and considerate
-- Welcome newcomers and help them learn
-- Focus on constructive feedback
-- Respect different viewpoints and experiences
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## How to Contribute
 

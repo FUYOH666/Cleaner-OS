@@ -2,6 +2,39 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.0] - 2026-05-29
+
+### Added
+
+- **Pydantic scan bundle** (`schema_version` 1.0) for `--save-results` JSON
+- **Recognizer plugins**: uv, Cursor, Hugging Face hub, Ollama, Playwright, Xcode, npm, Homebrew, pip, orphaned App Support
+- **`syscleaner plan`** — cleanup plan with risk tiers and optional `--target-gb` budget
+- **`syscleaner apply`** — tiered cleanup with dry-run default, `--execute`, `--allow-risky`
+- **`syscleaner export-sarif`** — SARIF 2.1.0 for security findings (CI / Code Scanning)
+- Native CLI delegation: `uv cache prune`, `hf cache prune`, `brew cleanup -s`, `npm cache clean`
+- `docs/PRODUCT.md`, `docs/migration-from-cleanmac.md`, `examples/com.syscleaner.weekly.plist`
+- GitHub Actions CI (macOS + Ubuntu, Python 3.12/3.13)
+- Expanded pytest suite (models, recognizers, apply, SARIF)
+
+### Changed
+
+- Version bump to 1.0.0; positioning: trusted audit + tiered cleanup
+- `cleanup.py` refactored; plan logic in `plan_builder.py`
+- README restructured (commercial CTA moved to `docs/COMMERCIAL.md`)
+
+### Security
+
+- Apply never runs risky actions without `--allow-risky`
+- Delete paths require explicit `--execute` and confirmation
+
+### Housekeeping (post-release polish)
+
+- Configuration profiles: `default`, `ml-workstation`, `ios-dev`, `minimal`
+- `syscleaner healthz` alias, `export-schema` command, Docker recognizer
+- Removed obsolete Wi-Fi script docs from `scripts/README.md`
+- Dev tooling: pyright + ruff in `dependency-groups.dev`, CI pyright job
+- `GOVERNANCE.md`, English test suite docstrings, production/stable classifier
+
 ## [0.3.0] - 2026-02-26
 
 ### Added
@@ -123,5 +156,6 @@ All notable changes to this project are documented in this file.
 - ✅ Сканирование артефактов проектов
 - ✅ Генерация отчетов (Markdown и JSON)
 
+[1.0.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v0.3.0...v1.0.0
 [0.3.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v0.2.1...v0.3.0
 [0.2.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v0.1.0...v0.2.0
