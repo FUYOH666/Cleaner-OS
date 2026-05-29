@@ -27,9 +27,16 @@ gh api repos/FUYOH666/Cleaner-OS/commits/main/check-runs --jq '.check_runs[].nam
 
 ## PyPI trusted publishing
 
-1. Create project `syscleaner` on PyPI (if name is free).
-2. Add GitHub Actions as trusted publisher (repo: `FUYOH666/Cleaner-OS`, workflow: `publish.yml`, environment: none).
-3. Push tag `v1.1.0` — [.github/workflows/publish.yml](../.github/workflows/publish.yml) runs `uv build` and publishes.
+1. Create project `syscleaner` on PyPI (name is free as of v1.1.0 prep).
+2. **Publishing → Trusted publishers → Add**: GitHub, owner `FUYOH666`, repo `Cleaner-OS`, workflow `publish.yml`, environment blank.
+3. Re-run failed publish or push a new tag:
+
+```bash
+gh workflow run publish.yml --ref v1.1.0
+# or: git tag -f v1.1.0 && git push -f origin v1.1.0  (only if no successful publish yet)
+```
+
+Claims from a failed run are listed in the Actions log (`repository`, `workflow_ref`, `ref`).
 
 ## Social preview
 
