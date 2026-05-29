@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- Publish workflow: manual `workflow_dispatch` only until PyPI trusted publisher exists (no failed emails on `v*` tags)
+
 ## [1.2.1] - 2026-05-29
 
 ### Added

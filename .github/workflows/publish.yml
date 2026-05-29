@@ -1,9 +1,11 @@
 name: Publish
 
+# Manual only until PyPI trusted publisher is configured (see docs/PYPI_DEFERRED.md).
+# Re-enable after setup:
+#   on:
+#     push:
+#       tags: ["v*"]
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
     inputs:
       tag:
