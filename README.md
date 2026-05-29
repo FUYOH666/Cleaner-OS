@@ -83,9 +83,10 @@ syscleaner export-schema -o scan-bundle.schema.json
 # TUI (optional)
 syscleaner tui --from-scan scan.json
 
-# Language
-syscleaner scan --all --lang ru
+# Language (global flag before subcommand, or env)
+syscleaner --lang ru scan --all
 export SYSCLEANER_LANG=ru
+syscleaner scan --all
 
 # Profiles (in config.yaml): default | ml-workstation | ios-dev | minimal
 ```

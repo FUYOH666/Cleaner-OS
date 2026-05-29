@@ -18,9 +18,17 @@ Free, open-source CLI that helps developers and power users **understand** what 
 - Full-stack developers (node_modules, Xcode, Docker, uv, Cursor)
 - Anyone who outgrew generic cleaners (CleanMyMac) for dev-specific junk
 
-## Non-goals (v1.0)
+## v1.1 capabilities
+
+- **i18n**: English (default) and Russian CLI via `--lang` / `SYSCLEANER_LANG`
+- **TUI** (optional): Textual UI over saved scan JSON
+- **MCP** (optional): read-only tools for agents; `apply` gated by `allow_execute`
+- **PyPI**: `pip install syscleaner` (after trusted-publisher setup on PyPI)
+
+## Non-goals (v1.x)
 
 - Duplicate-file finder, app uninstaller UI, Windows support
+- Full gettext / localized Markdown reports (v1.2+)
 - Automatic scheduled deletion (weekly jobs should scan + report only)
 
 ## Commercial support

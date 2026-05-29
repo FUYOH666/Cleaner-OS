@@ -715,6 +715,7 @@ def _health_impl() -> None:
 
 def main() -> None:
     """Application entry point."""
+    set_locale(None)
     app()
 
 
