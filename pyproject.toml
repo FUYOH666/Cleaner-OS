@@ -1,6 +1,6 @@
 [project]
 name = "syscleaner"
-version = "1.0.0"
+version = "1.1.0"
 description = "Trusted audit and tiered cleanup for dev workstations (macOS and Linux)"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
@@ -53,13 +53,12 @@ Repository = "https://github.com/FUYOH666/Cleaner-OS"
 Issues = "https://github.com/FUYOH666/Cleaner-OS/issues"
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=7.4.0",
-    "ruff>=0.9.0",
-    "pyright>=1.1.400",
-]
+tui = ["textual>=0.80.0"]
+mcp = ["mcp>=1.6.0"]
+all = ["textual>=0.80.0", "mcp>=1.6.0"]
 
 [project.scripts]
+syscleaner-mcp = "syscleaner.mcp_server:main"
 syscleaner = "syscleaner.main:app"
 system-cleaner = "syscleaner.main:app"
 
@@ -84,5 +83,10 @@ dev = [
     "pytest>=8.4.2",
     "ruff>=0.9.0",
     "pyright>=1.1.400",
+    "textual>=0.80.0",
+    "mcp>=1.6.0",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/syscleaner"]
 

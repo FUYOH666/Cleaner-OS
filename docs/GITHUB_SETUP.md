@@ -1,57 +1,48 @@
 # GitHub repository setup (maintainer)
 
-After pushing v1.0.0, configure the repository **About** section on GitHub:
+## Branch protection (`main`)
 
-## Description (≤350 characters)
-
+```bash
+gh api repos/FUYOH666/Cleaner-OS/branches/main/protection -X PUT \
+  --input - <<'EOF'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["test"]
+  },
+  "enforce_admins": false,
+  "required_pull_request_reviews": null,
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+EOF
 ```
-Trusted audit & tiered cleanup for dev workstations: ML caches, security, Python deps, AI-era IDE caches. macOS & Linux. Safe by default.
+
+If the required check name differs, list contexts with:
+
+```bash
+gh api repos/FUYOH666/Cleaner-OS/commits/main/check-runs --jq '.check_runs[].name'
 ```
 
-## Website
+## PyPI trusted publishing
 
-`https://scanovich.ai` or enable GitHub Pages from `/docs` if added later.
-
-## Topics
-
-```
-python
-macos
-linux
-cli
-system-cleaner
-security-audit
-huggingface
-cleanup-tool
-ml-cache
-typer
-pydantic
-uv
-cursor
-disk-space
-developer-tools
-sarif
-open-source
-```
+1. Create project `syscleaner` on PyPI (if name is free).
+2. Add GitHub Actions as trusted publisher (repo: `FUYOH666/Cleaner-OS`, workflow: `publish.yml`, environment: none).
+3. Push tag `v1.1.0` — [.github/workflows/publish.yml](../.github/workflows/publish.yml) runs `uv build` and publishes.
 
 ## Social preview
 
-Add `docs/assets/social-preview.png` (1200×630) — screenshot of `syscleaner scan --all` summary table — then set in **Settings → General → Social preview**.
+Committed: [docs/assets/social-preview.png](assets/social-preview.png). Upload in **Settings → General → Social preview** if GitHub does not pick it from the default Open Graph path.
 
 ## Release
 
 ```bash
-git tag -a v1.0.0 -m "2026 Relaunch: tiered apply + AI-era recognizers"
-git push origin v1.0.0
+git tag -a v1.1.0 -m "v1.1.0: i18n, TUI, MCP, PyPI"
+git push origin v1.1.0
+gh release create v1.1.0 --notes-file CHANGELOG.md
 ```
-
-Copy notes from [CHANGELOG.md](../CHANGELOG.md) into the GitHub Release.
 
 ## Dependencies
 
-Dependabot is **disabled** (no `.github/dependabot.yml`). Update deps intentionally:
-
-```bash
-uv lock --upgrade-package <name>
-uv run pytest && uv run ruff check .
-```
+Dependabot is disabled. Update via `uv lock --upgrade-package <name>`.

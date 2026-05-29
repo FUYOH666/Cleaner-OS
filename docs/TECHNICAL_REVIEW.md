@@ -1,38 +1,28 @@
-# Technical review log (2026-05-29)
+# Technical review log
 
-Offline review before v1.0.0 release. Status: **addressed in main**.
+## v1.1.0 (2026-05-29) — complete
 
-## Findings and resolutions
+All items from the v1.0.1 / v1.1.0 finish plan are implemented:
 
-| Area | Issue | Resolution |
-|------|--------|------------|
-| Release | v1.0 code uncommitted on `main` | Committed, tagged `v1.0.0`, pushed |
-| Docs | `scripts/README.md` referenced non-existent Wi-Fi scripts | Rewritten; only existing `.example` scripts |
-| Tooling | `pyright` missing from dev deps | Added to `dependency-groups.dev`; CI job added |
-| Config | `profile` field unused | Implemented `profiles.py` presets |
-| CLI | No `healthz` alias | Added `syscleaner healthz` |
-| CLI | No JSON Schema export | Added `syscleaner export-schema` |
-| Recognizers | Docker missing from clean-m1 parity | Added `docker_cache` recognizer |
-| Git | `*.json` in `.gitignore` too broad | Narrowed to scan output patterns |
-| GitHub | Empty About / topics | Updated via `gh` API |
-| Tests | Russian docstrings in tests | English in `tests/` |
-| Classifier | Beta while shipping 1.0 | Production/Stable |
+- English-only `src/` with CI Cyrillic gate
+- i18n (`en` / `ru`), TUI and MCP optional extras
+- HF CLI cache enrichment, PyPI publish workflow
+- Branch protection documented, social preview asset
+- Legacy Russian changelog archived
 
-## Remaining (non-blocking)
+## Backlog (v1.2+)
 
-- **Russian docstrings** in legacy `scanner/` and `platform/` modules (internal; does not affect CLI UX).
-- **Social preview image** — add `docs/assets/social-preview.png` manually (see `docs/assets/README.md`).
-- **Dependabot** — disabled; stale PR branches removed.
-- **PyPI publish** — optional; install via `uv tool install git+...` documented in README.
-- **Phase 2 plan items** (TUI, MCP, i18n) — deferred to v1.1+.
+- Markdown report i18n (gettext)
+- Duplicate finder / app uninstaller
+- Homebrew tap
+- GitHub Discussions
 
-## Quality gate (local)
+## Quality gate
 
 ```bash
-uv sync --all-groups
+uv sync --all-groups --all-extras
 uv run ruff check .
 uv run pyright
 uv run pytest -q
+! rg '[А-Яа-яЁё]' src/
 ```
-
-Last run: 19 tests passed, 0 pyright errors.

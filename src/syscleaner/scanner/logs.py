@@ -1,4 +1,4 @@
-"""Модуль сканирования логов."""
+"""Log directory scan module."""
 
 import logging
 from typing import Any
@@ -10,14 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 def scan_logs(paths: PlatformPaths) -> list[dict[str, Any]]:
-    """
-    Сканировать логи.
+    """Scan log directories.
 
     Args:
-        paths: Объект PlatformPaths для получения путей.
+        paths: PlatformPaths instance for resolving paths.
 
     Returns:
-        Список найденных логов.
+        List of log directory entries.
     """
     results: list[dict[str, Any]] = []
     logs_dir = paths.logs_dir()
@@ -42,8 +41,8 @@ def scan_logs(paths: PlatformPaths) -> list[dict[str, Any]]:
                         },
                     )
     except PermissionError:
-        logger.error(f"Нет доступа к директории логов: {logs_dir}")
+        logger.error("No access to logs directory: %s", logs_dir)
     except Exception as e:
-        logger.error(f"Ошибка при сканировании логов: {e}")
+        logger.error("Error scanning logs: %s", e)
 
     return sorted(results, key=lambda x: x["size_bytes"], reverse=True)

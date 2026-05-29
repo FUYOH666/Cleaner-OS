@@ -1,4 +1,4 @@
-"""Модули сканирования системы."""
+"""System scanning modules."""
 
 from syscleaner.scanner.applications import scan_application_support
 from syscleaner.scanner.caches import scan_caches

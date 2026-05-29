@@ -1,4 +1,4 @@
-"""Модуль сканирования корзины."""
+"""Trash directory scan module."""
 
 import logging
 from typing import Any
@@ -10,14 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 def scan_trash(paths: PlatformPaths) -> dict[str, Any]:
-    """
-    Сканировать корзину.
+    """Scan the trash directory.
 
     Args:
-        paths: Объект PlatformPaths для получения путей.
+        paths: PlatformPaths instance for resolving paths.
 
     Returns:
-        Информация о корзине.
+        Trash directory statistics.
     """
     trash_dir = paths.trash_dir()
 
@@ -38,5 +37,5 @@ def scan_trash(paths: PlatformPaths) -> dict[str, Any]:
             "count": count,
         }
     except (OSError, PermissionError) as e:
-        logger.error(f"Ошибка при сканировании корзины: {e}")
+        logger.error("Error scanning trash: %s", e)
         return {"path": str(trash_dir), "size_bytes": 0, "size_mb": 0.0, "count": 0}

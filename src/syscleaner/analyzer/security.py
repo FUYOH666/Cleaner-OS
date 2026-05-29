@@ -11,28 +11,27 @@ logger = logging.getLogger(__name__)
 
 
 def _should_ignore_file(file_path: Path) -> bool:
-    """
-    Проверить, нужно ли игнорировать файл при проверке безопасности.
+    """Return True if the file should be skipped during security checks.
 
-    Игнорируются:
-    - Файлы в node_modules, dist, build, .venv, venv
-    - Type stubs (.pyi файлы)
-    - Файлы в расширениях редакторов (.cursor/extensions, .vscode/extensions)
-    - Файлы в кэшах библиотек (Library/Caches/, .cache/)
-    - Файлы в системных директориях приложений
-    - Файлы стандартных библиотек Python (site-packages, lib/python3.*/)
-    - Файлы в системных директориях установщиков (uv, conda, pip)
+    Ignores:
+    - Files under node_modules, dist, build, .venv, venv
+    - Type stubs (.pyi files)
+    - Editor extension trees (.cursor/extensions, .vscode/extensions)
+    - Library cache dirs (Library/Caches/, .cache/)
+    - System application directories
+    - Standard Python library paths (site-packages, lib/python3.*/)
+    - Installer-managed paths (uv, conda, pip)
 
     Args:
-        file_path: Путь к файлу.
+        file_path: Path to the file.
 
     Returns:
-        True если файл нужно игнорировать, иначе False.
+        True if the file should be ignored.
     """
     path_str = str(file_path)
     parts = path_str.split("/")
 
-    # Игнорируем файлы в артефактах сборки и зависимостях
+    # Build artifacts and dependency trees
     ignore_dir_names = {
         "node_modules",
         "dist",
@@ -48,42 +47,41 @@ def _should_ignore_file(file_path: Path) -> bool:
         ".cache",
     }
 
-    # Игнорируем файлы в расширениях редакторов
+    # Editor extensions
     if ".cursor/extensions" in path_str or ".vscode/extensions" in path_str:
         return True
 
-    # Игнорируем файлы в кэшах приложений (Cypress, библиотеки)
+    # Application caches (Cypress, libraries, etc.)
     if "/Library/Caches/" in path_str:
         return True
 
-    # Игнорируем файлы в системных директориях установщиков
+    # Installer-managed directories
     if "/.local/share/uv/" in path_str or "/.local/share/pip/" in path_str:
         return True
     if "/conda/" in path_str and ("site-packages" in path_str or "lib/python" in path_str):
         return True
 
-    # Игнорируем файлы стандартных библиотек Python
+    # Standard Python library trees
     if "lib/python" in path_str and ("site-packages" in path_str or "dist-packages" in path_str):
         return True
 
-    # Игнорируем файлы в документации библиотек (docs, documentation)
+    # Library documentation
     if "/docs/" in path_str.lower() or "/documentation/" in path_str.lower():
         return True
 
-    # Игнорируем стандартные файлы библиотек (secrets.py, credentials.py из стандартной библиотеки)
+    # Installed packages (secrets.py, credentials.py from third-party libs)
     if "site-packages" in path_str or "dist-packages" in path_str:
         return True
 
-    # Игнорируем type stubs (`.pyi` файлы) - это не реальный код с секретами
+    # Type stubs are not runtime secret carriers
     if file_path.suffix == ".pyi":
         return True
 
-    # Игнорируем заголовочные файлы C/C++ (`.h`, `.hpp`) - это не секреты
+    # C/C++ headers are not secrets
     if file_path.suffix in {".h", ".hpp", ".hxx"}:
         return True
 
-    # Проверяем, есть ли в пути игнорируемые директории
-    # ВАЖНО: не игнорируем файлы .env в корне проектов разработки
+    # Do not ignore .env at project roots via generic dir names
     for part in parts:
         if part in ignore_dir_names:
             return True
@@ -92,7 +90,7 @@ def _should_ignore_file(file_path: Path) -> bool:
 
 
 class SecurityIssue:
-    """Проблема безопасности."""
+    """A security finding."""
 
     def __init__(
         self,
@@ -102,15 +100,14 @@ class SecurityIssue:
         description: str,
         recommendation: str | None = None,
     ) -> None:
-        """
-        Инициализация проблемы безопасности.
+        """Initialize a security issue.
 
         Args:
-            severity: Уровень серьезности (high, medium, low).
-            category: Категория проблемы.
-            path: Путь к проблемному файлу/директории.
-            description: Описание проблемы.
-            recommendation: Рекомендация по исправлению.
+            severity: Severity level (high, medium, low).
+            category: Issue category.
+            path: Path to the affected file or directory.
+            description: Issue description.
+            recommendation: Optional remediation guidance.
         """
         self.severity = severity
         self.category = category
@@ -120,23 +117,22 @@ class SecurityIssue:
 
 
 def check_ssh_permissions(paths: PlatformPaths) -> list[SecurityIssue]:
-    """
-    Проверить права доступа SSH ключей.
+    """Check SSH key and .ssh directory permissions.
 
     Args:
-        paths: Объект PlatformPaths для получения путей.
+        paths: PlatformPaths instance for resolving paths.
 
     Returns:
-        Список найденных проблем безопасности.
+        List of security issues.
     """
     issues: list[SecurityIssue] = []
     ssh_dir = paths.ssh_dir()
 
     if not ssh_dir.exists():
-        logger.info(f"SSH директория не найдена: {ssh_dir}")
+        logger.info("SSH directory not found: %s", ssh_dir)
         return issues
 
-    # Проверяем права на саму директорию
+    # Check .ssh directory permissions
     try:
         dir_stat = ssh_dir.stat()
         dir_mode = stat.filemode(dir_stat.st_mode)
@@ -151,17 +147,17 @@ def check_ssh_permissions(paths: PlatformPaths) -> list[SecurityIssue]:
                 ),
             )
     except OSError as e:
-        logger.error(f"Ошибка при проверке прав на .ssh: {e}")
+        logger.error("Error checking .ssh permissions: %s", e)
         return issues
 
-    # Проверяем приватные ключи
+    # Check private keys
     private_key_patterns = ["id_rsa", "id_ed25519", "id_ecdsa", "id_dsa"]
     for key_file in ssh_dir.iterdir():
         if key_file.is_file() and any(key_file.name == pattern for pattern in private_key_patterns):
             try:
                 file_stat = key_file.stat()
                 file_mode = stat.filemode(file_stat.st_mode)
-                # Приватные ключи должны быть -rw------- (600)
+                # Private keys must be -rw------- (600)
                 if file_mode != "-rw-------":
                     issues.append(
                         SecurityIssue(
@@ -173,22 +169,21 @@ def check_ssh_permissions(paths: PlatformPaths) -> list[SecurityIssue]:
                         ),
                     )
             except OSError as e:
-                logger.error(f"Ошибка при проверке прав на ключ {key_file}: {e}")
+                logger.error("Error checking key permissions for %s: %s", key_file, e)
 
     return issues
 
 
 def check_file_permissions(file_path: Path) -> SecurityIssue | None:
-    """
-    Проверить права доступа на файл.
+    """Check file permissions for overly permissive sensitive files.
 
     Args:
-        file_path: Путь к файлу.
+        file_path: Path to the file.
 
     Returns:
-        SecurityIssue если найдена проблема, иначе None.
+        SecurityIssue if a problem is found, otherwise None.
     """
-    # Игнорируем файлы в артефактах сборки, расширениях и type stubs
+    # Skip build artifacts, extensions, and type stubs
     if _should_ignore_file(file_path):
         return None
 
@@ -196,9 +191,8 @@ def check_file_permissions(file_path: Path) -> SecurityIssue | None:
         file_stat = file_path.stat()
         file_mode = stat.filemode(file_stat.st_mode)
 
-        # Проверяем, доступен ли файл для чтения всем (world-readable)
+        # World-readable sensitive files
         if file_stat.st_mode & stat.S_IROTH:
-            # Проверяем, содержит ли файл секреты (по расширению или имени)
             sensitive_extensions = [".env", ".key", ".pem", ".p12", ".pfx"]
             sensitive_names = ["secret", "password", "credential", "token", "api_key"]
 
@@ -225,15 +219,14 @@ def find_sensitive_files(
     search_paths: list[Path],
     patterns: list[str],
 ) -> list[dict[str, Any]]:
-    """
-    Найти файлы с секретами по паттернам.
+    """Find files matching sensitive-name patterns.
 
     Args:
-        search_paths: Список путей для поиска.
-        patterns: Список паттернов для поиска (например, ["*.env", "*secret*"]).
+        search_paths: Directories to search.
+        patterns: Glob patterns (e.g. ["*.env", "*secret*"]).
 
     Returns:
-        Список найденных файлов с секретами.
+        List of matching files with metadata.
     """
     found_files: list[dict[str, Any]] = []
 
@@ -243,10 +236,8 @@ def find_sensitive_files(
 
         try:
             for pattern in patterns:
-                # Используем rglob для рекурсивного поиска
                 for file_path in search_path.rglob(pattern):
                     if file_path.is_file():
-                        # Игнорируем файлы в артефактах сборки, расширениях и type stubs
                         if _should_ignore_file(file_path):
                             continue
 
@@ -262,7 +253,7 @@ def find_sensitive_files(
                         except (OSError, PermissionError):
                             continue
         except Exception as e:
-            logger.debug(f"Нет доступа к {search_path}: {e}")
+            logger.debug("No access to %s: %s", search_path, e)
 
     return found_files
 
@@ -273,17 +264,16 @@ def scan_security(
     check_permissions: bool = True,
     sensitive_patterns: list[str] | None = None,
 ) -> dict[str, Any]:
-    """
-    Выполнить полное сканирование безопасности.
+    """Run a full security scan.
 
     Args:
-        paths: Объект PlatformPaths для получения путей.
-        check_ssh: Проверять SSH ключи.
-        check_permissions: Проверять права доступа файлов.
-        sensitive_patterns: Паттерны для поиска чувствительных файлов.
+        paths: PlatformPaths instance for resolving paths.
+        check_ssh: Whether to check SSH permissions.
+        check_permissions: Whether to check file permissions.
+        sensitive_patterns: Patterns for sensitive file discovery.
 
     Returns:
-        Словарь с результатами сканирования безопасности.
+        Security scan results.
     """
     issues: list[SecurityIssue] = []
     sensitive_files: list[dict[str, Any]] = []
@@ -296,7 +286,6 @@ def scan_security(
         search_paths = [paths.home, paths.home / "development", paths.home / "Documents"]
         sensitive_files = find_sensitive_files(search_paths, sensitive_patterns)
 
-        # Проверяем права доступа на найденные файлы
         if check_permissions:
             for file_info in sensitive_files:
                 file_path = Path(file_info["path"])
@@ -304,7 +293,6 @@ def scan_security(
                 if perm_issue:
                     issues.append(perm_issue)
 
-    # Конвертируем SecurityIssue в словари для сериализации
     issues_dict = [
         {
             "severity": issue.severity,

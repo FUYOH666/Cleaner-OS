@@ -1,4 +1,4 @@
-"""Модуль сканирования остатков удаленных приложений."""
+"""Scan module for leftovers from removed applications."""
 
 import logging
 from typing import Any
@@ -13,29 +13,28 @@ logger = logging.getLogger(__name__)
 
 
 def scan_application_support(paths: PlatformPaths) -> list[dict[str, Any]]:
-    """
-    Сканировать директорию поддержки приложений на остатки удаленных приложений.
+    """Scan application support directories for leftovers from removed apps.
 
     Args:
-        paths: Объект PlatformPaths для получения путей.
+        paths: PlatformPaths instance for resolving paths.
 
     Returns:
-        Список найденных остатков приложений.
+        List of application support directories and sizes.
     """
     results: list[dict[str, Any]] = []
     app_support_dir = paths.app_support_dir()
 
     if not app_support_dir.exists():
-        logger.warning(f"Директория поддержки приложений не найдена: {app_support_dir}")
+        logger.warning("Application support directory not found: %s", app_support_dir)
         return results
 
-    # Получаем список установленных приложений в зависимости от платформы
+    # Collect installed application names for the current platform
     installed_apps: set[str] = set()
 
     if IS_MACOS:
         installed_apps = get_installed_apps()
     elif IS_LINUX:
-        # Для Linux проверяем разные источники приложений
+        # On Linux, check multiple application sources
         installed_apps.update(get_installed_packages())
         installed_apps.update(get_flatpak_apps())
         installed_apps.update(get_snap_apps())
@@ -43,9 +42,9 @@ def scan_application_support(paths: PlatformPaths) -> list[dict[str, Any]]:
     try:
         for app_dir in app_support_dir.iterdir():
             if app_dir.is_dir():
-                # Проверяем, есть ли соответствующее приложение
+                # Check whether a matching application is still installed
                 app_name = app_dir.name.lower()
-                # Простая проверка - если нет установленного приложения, возможно оно удалено
+                # Simple heuristic: no installed app may mean it was removed
                 size = get_directory_size(app_dir)
                 if size > 0:
                     size_mb = size / (1024 * 1024)
@@ -61,8 +60,8 @@ def scan_application_support(paths: PlatformPaths) -> list[dict[str, Any]]:
                         },
                     )
     except PermissionError:
-        logger.error(f"Нет доступа к директории поддержки приложений: {app_support_dir}")
+        logger.error("No access to application support directory: %s", app_support_dir)
     except Exception as e:
-        logger.error(f"Ошибка при сканировании поддержки приложений: {e}")
+        logger.error("Error scanning application support: %s", e)
 
     return sorted(results, key=lambda x: x["size_bytes"], reverse=True)

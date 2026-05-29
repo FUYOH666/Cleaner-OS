@@ -16,6 +16,7 @@ from syscleaner.analyzer import analyze_python_dependencies, scan_ml_cache, scan
 from syscleaner.apply.orchestrator import apply_plan
 from syscleaner.cleanup import analyze_cleanup_opportunities
 from syscleaner.config import load_config
+from syscleaner.i18n import set_locale, t
 from syscleaner.models.entities import RiskTier, ScanBundle
 from syscleaner.plan_builder import build_plan_from_bundle
 from syscleaner.platform import PlatformPaths
@@ -49,6 +50,21 @@ app = typer.Typer(
 console = Console()
 
 
+@app.callback()
+def global_options(
+    lang: Annotated[
+        str | None,
+        typer.Option("--lang", help="UI language: en or ru"),
+    ] = None,
+) -> None:
+    """Global options applied before subcommands."""
+    try:
+        set_locale(lang)
+    except ValueError as e:
+        console.print(f"[red]{e}[/red]")
+        raise typer.Exit(code=1) from e
+
+
 def _load_bundle_file(path: str) -> ScanBundle:
     with open(path, encoding="utf-8") as f:
         return load_scan_bundle(json.load(f))
@@ -58,11 +74,11 @@ def print_findings_table(bundle: ScanBundle) -> None:
     """Print recognizer findings summary."""
     if not bundle.findings:
         return
-    table = Table(title="Recognizer Findings (top 15)")
-    table.add_column("Risk", style="yellow")
-    table.add_column("Category", style="cyan")
-    table.add_column("Title")
-    table.add_column("Size", style="green")
+    table = Table(title=t("recognizer_findings"))
+    table.add_column(t("risk"), style="yellow")
+    table.add_column(t("category"), style="cyan")
+    table.add_column(t("title"))
+    table.add_column(t("size"), style="green")
     for finding in sorted(bundle.findings, key=lambda x: x.size_bytes, reverse=True)[:15]:
         size_mb = finding.size_bytes / (1024 * 1024)
         table.add_row(
@@ -84,10 +100,10 @@ def print_summary_table(
     bundle: ScanBundle | None = None,
 ) -> None:
     """Print summary table of scan results."""
-    table = Table(title="Scan Summary")
+    table = Table(title=t("scan_summary"))
 
-    table.add_column("Category", style="cyan")
-    table.add_column("Value", style="green")
+    table.add_column(t("category"), style="cyan")
+    table.add_column(t("value"), style="green")
 
     # Total size
     total_size_mb = (
@@ -184,7 +200,7 @@ def scan(
     try:
         settings = load_config(config_path)
     except Exception as e:
-        console.print(f"[red]Config load error: {e}[/red]")
+        console.print(f"[red]{t('config_error')}: {e}[/red]")
         sys.exit(1)
 
     paths = PlatformPaths()
@@ -364,11 +380,8 @@ def scan(
         results_path.parent.mkdir(parents=True, exist_ok=True)
         with results_path.open("w", encoding="utf-8") as f:
             f.write(bundle.model_dump_json(indent=2))
-        console.print(f"[green]✓[/green] Results saved to {results_path}")
-        console.print(
-            "[dim]Next: syscleaner plan --from-scan "
-            f"{results_path} | syscleaner apply --from-scan {results_path} --dry-run[/dim]",
-        )
+        console.print(f"[green]✓[/green] {t('results_saved', path=results_path)}")
+        console.print(f"[dim]{t('next_steps', path=results_path)}[/dim]")
 
 
 @app.command()
@@ -472,11 +485,11 @@ def plan(
         target_bytes=target_bytes,
     )
 
-    table = Table(title="Cleanup Plan")
-    table.add_column("Risk")
-    table.add_column("Type")
-    table.add_column("Action")
-    table.add_column("Detail")
+    table = Table(title=t("cleanup_plan"))
+    table.add_column(t("risk"))
+    table.add_column(t("type"))
+    table.add_column(t("action"))
+    table.add_column(t("detail"))
     for action in cleanup_plan.actions[:30]:
         if action.command:
             detail = " ".join(action.command)
@@ -492,9 +505,9 @@ def plan(
     if len(cleanup_plan.actions) > 30:
         console.print(f"[dim]... and {len(cleanup_plan.actions) - 30} more actions[/dim]")
     gb = cleanup_plan.total_reclaimable_bytes / (1024**3)
-    console.print(f"\n[bold]Actions:[/bold] {len(cleanup_plan.actions)}")
-    console.print(f"[bold]Estimated reclaimable:[/bold] {gb:.2f} GB")
-    console.print(f"[bold]By risk:[/bold] {cleanup_plan.by_risk}")
+    console.print(f"\n[bold]{t('actions_count')}:[/bold] {len(cleanup_plan.actions)}")
+    console.print(f"[bold]{t('reclaimable')}:[/bold] {gb:.2f} GB")
+    console.print(f"[bold]{t('by_risk')}:[/bold] {cleanup_plan.by_risk}")
 
 
 @app.command()
@@ -522,9 +535,9 @@ def apply(
     is_dry = dry_run and not execute
 
     if not is_dry:
-        console.print("[yellow]Executing cleanup actions.[/yellow]")
+        console.print(f"[yellow]{t('execute_mode')}[/yellow]")
     else:
-        console.print("[cyan]Dry-run mode — no changes will be made.[/cyan]")
+        console.print(f"[cyan]{t('dry_run_mode')}[/cyan]")
 
     result = apply_plan(
         cleanup_plan,
@@ -535,10 +548,14 @@ def apply(
     )
     for msg in result.messages:
         console.print(msg)
-    console.print(
-        f"\n[bold]Summary:[/bold] executed={result.executed} "
-        f"skipped={result.skipped} failed={result.failed} dry_run={result.dry_run}",
+    summary = t(
+        "apply_summary",
+        executed=result.executed,
+        skipped=result.skipped,
+        failed=result.failed,
+        dry_run=result.dry_run,
     )
+    console.print(f"\n[bold]{summary}[/bold]")
     if result.failed:
         sys.exit(1)
 
@@ -560,7 +577,18 @@ def export_sarif_cmd(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(sarif_content, encoding="utf-8")
     n = len(bundle.security_issues) or len(bundle.security_results.get("issues", []))
-    console.print(f"[green]✓[/green] SARIF written to {out_path} ({n} issues)")
+    console.print(f"[green]✓[/green] {t('sarif_written', path=out_path, count=n)}")
+
+
+@app.command()
+def tui(
+    scan_results_file: Annotated[str, typer.Option("--from-scan", help="Scan JSON path")],
+    tier: Annotated[str, typer.Option("--tier", help="Max risk tier")] = "moderate",
+) -> None:
+    """Interactive TUI to review cleanup plan (requires optional `tui` extra)."""
+    from syscleaner.tui_app import run_tui
+
+    run_tui(scan_results_file, tier=tier)
 
 
 @app.command(name="export-schema")
@@ -575,7 +603,7 @@ def export_schema(
     text = json.dumps(schema, indent=2)
     if output:
         Path(output).write_text(text, encoding="utf-8")
-        console.print(f"[green]✓[/green] Schema written to {output}")
+        console.print(f"[green]✓[/green] {t('schema_written', path=output)}")
     else:
         console.print(text)
 
@@ -594,7 +622,7 @@ def healthz() -> None:
 
 def _health_impl() -> None:
     """Internal health check implementation."""
-    console.print("[bold]System Status Check[/bold]\n")
+    console.print(f"[bold]{t('health_title')}[/bold]\n")
 
     python_version = sys.version_info
     py_ver = f"{python_version.major}.{python_version.minor}.{python_version.micro}"

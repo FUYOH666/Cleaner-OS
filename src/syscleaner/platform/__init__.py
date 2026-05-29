@@ -1,4 +1,4 @@
-"""Платформо-специфичные модули."""
+"""Platform-specific modules."""
 
 from syscleaner.platform.detector import IS_LINUX, IS_MACOS, Platform
 from syscleaner.platform.paths import PlatformPaths

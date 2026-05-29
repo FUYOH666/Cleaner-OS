@@ -1,11 +1,11 @@
-"""Модуль определения платформы."""
+"""Platform detection module."""
 
 import platform
 from enum import Enum
 
 
 class Platform(str, Enum):
-    """Поддерживаемые платформы."""
+    """Supported platforms."""
 
     MACOS = "Darwin"
     LINUX = "Linux"
@@ -13,11 +13,10 @@ class Platform(str, Enum):
 
 
 def detect_platform() -> Platform:
-    """
-    Определить текущую платформу.
+    """Detect the current platform.
 
     Returns:
-        Текущая платформа.
+        The detected platform.
     """
     system = platform.system()
     if system == "Darwin":
@@ -28,7 +27,7 @@ def detect_platform() -> Platform:
         return Platform.UNKNOWN
 
 
-# Глобальные переменные для определения платформы
+# Global platform flags
 CURRENT_PLATFORM = detect_platform()
 IS_MACOS = CURRENT_PLATFORM == Platform.MACOS
 IS_LINUX = CURRENT_PLATFORM == Platform.LINUX

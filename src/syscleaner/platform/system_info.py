@@ -1,4 +1,4 @@
-"""Модуль определения системной информации (железо, диск)."""
+"""Hardware and disk system information module."""
 
 import logging
 import shutil
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class GPUInfo:
-    """Информация о GPU."""
+    """GPU information."""
 
     has_gpu: bool
     gpu_type: str | None = None  # NVIDIA, AMD, Intel, Metal
@@ -23,7 +23,7 @@ class GPUInfo:
 
 @dataclass
 class DiskInfo:
-    """Информация о диске."""
+    """Disk usage information."""
 
     total_gb: float
     used_gb: float
@@ -32,24 +32,22 @@ class DiskInfo:
 
 
 def format_size_gb(size_bytes: int) -> float:
-    """
-    Преобразовать размер в байтах в гигабайты.
+    """Convert a byte size to gigabytes.
 
     Args:
-        size_bytes: Размер в байтах.
+        size_bytes: Size in bytes.
 
     Returns:
-        Размер в гигабайтах.
+        Size in gigabytes.
     """
     return size_bytes / (1024**3)
 
 
 def detect_gpu() -> GPUInfo:
-    """
-    Определить наличие и тип GPU.
+    """Detect GPU presence and type.
 
     Returns:
-        GPUInfo с информацией о GPU.
+        GPUInfo with GPU details.
     """
     if IS_MACOS:
         return _detect_gpu_macos()
@@ -60,8 +58,8 @@ def detect_gpu() -> GPUInfo:
 
 
 def _detect_gpu_macos() -> GPUInfo:
-    """Определить GPU на macOS."""
-    # Проверяем наличие Metal (macOS GPU API)
+    """Detect GPU on macOS."""
+    # Check Metal via system_profiler
     try:
         result = subprocess.run(
             ["system_profiler", "SPDisplaysDataType"],
@@ -72,7 +70,7 @@ def _detect_gpu_macos() -> GPUInfo:
         if result.returncode == 0:
             output = result.stdout.lower()
             if "chipset model" in output or "displays" in output:
-                # Парсим модель GPU
+                # Parse GPU model
                 lines = result.stdout.splitlines()
                 gpu_model = None
                 for i, line in enumerate(lines):
@@ -86,26 +84,25 @@ def _detect_gpu_macos() -> GPUInfo:
                     has_gpu=True,
                     gpu_type="Metal",
                     gpu_model=gpu_model or "Unknown",
-                    details=result.stdout[:200],  # Первые 200 символов
+                    details=result.stdout[:200],  # First 200 characters
                 )
     except (FileNotFoundError, subprocess.TimeoutExpired) as e:
-        logger.debug(f"Не удалось определить GPU через system_profiler: {e}")
+        logger.debug("Failed to detect GPU via system_profiler: %s", e)
 
-    # Fallback: проверяем наличие Metal через другие методы
+    # Fallback: check for Metal framework
     try:
-        # Проверяем наличие Metal фреймворка
         metal_framework = Path("/System/Library/Frameworks/Metal.framework")
         if metal_framework.exists():
             return GPUInfo(has_gpu=True, gpu_type="Metal")
     except Exception as e:
-        logger.debug(f"Ошибка при проверке Metal: {e}")
+        logger.debug("Error checking Metal: %s", e)
 
     return GPUInfo(has_gpu=False)
 
 
 def _detect_gpu_linux() -> GPUInfo:
-    """Определить GPU на Linux."""
-    # Проверяем NVIDIA через nvidia-smi
+    """Detect GPU on Linux."""
+    # Check NVIDIA via nvidia-smi
     try:
         result = subprocess.run(
             ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
@@ -123,12 +120,12 @@ def _detect_gpu_linux() -> GPUInfo:
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
 
-    # Проверяем наличие NVIDIA драйвера
+    # Check for NVIDIA driver
     nvidia_driver = Path("/proc/driver/nvidia")
     if nvidia_driver.exists():
         return GPUInfo(has_gpu=True, gpu_type="NVIDIA")
 
-    # Проверяем через lspci
+    # Check via lspci
     try:
         result = subprocess.run(
             ["lspci"],
@@ -147,7 +144,7 @@ def _detect_gpu_linux() -> GPUInfo:
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
 
-    # Проверяем через /proc/driver
+    # Check /proc/driver
     try:
         if Path("/proc/driver/radeon").exists():
             return GPUInfo(has_gpu=True, gpu_type="AMD")
@@ -160,14 +157,13 @@ def _detect_gpu_linux() -> GPUInfo:
 
 
 def get_disk_info(path: Path | None = None) -> DiskInfo | None:
-    """
-    Получить информацию о диске.
+    """Return disk usage for a path.
 
     Args:
-        path: Путь для проверки диска. Если None, используется корневая директория.
+        path: Path to check. Uses root if None.
 
     Returns:
-        DiskInfo с информацией о диске или None если не удалось получить информацию.
+        DiskInfo, or None if disk usage could not be read.
     """
     if path is None:
         path = Path("/")
@@ -188,16 +184,15 @@ def get_disk_info(path: Path | None = None) -> DiskInfo | None:
             usage_percent=usage_percent,
         )
     except Exception as e:
-        logger.debug(f"Ошибка при получении информации о диске: {e}")
+        logger.debug("Error reading disk info: %s", e)
         return None
 
 
 def get_home_disk_info() -> DiskInfo | None:
-    """
-    Получить информацию о диске домашней директории.
+    """Return disk usage for the home directory volume.
 
     Returns:
-        DiskInfo с информацией о диске домашней директории.
+        DiskInfo for the home directory.
     """
     home = Path.home()
     return get_disk_info(home)

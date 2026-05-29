@@ -1,4 +1,4 @@
-"""Платформо-специфичные функции для Linux."""
+"""Linux-specific platform helpers."""
 
 import logging
 import subprocess
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class LinuxDistro:
-    """Информация о дистрибутиве Linux."""
+    """Linux distribution metadata."""
 
     name: str
     version: str
@@ -18,20 +18,19 @@ class LinuxDistro:
 
 
 def detect_linux_distro() -> LinuxDistro | None:
-    """
-    Определить дистрибутив Linux.
+    """Detect the Linux distribution.
 
-    Проверяет стандартные файлы для определения дистрибутива:
-    - /etc/os-release (современный стандарт)
+    Checks standard files:
+    - /etc/os-release (modern standard)
     - /etc/lsb-release (Ubuntu/Debian)
     - /etc/debian_version (Debian)
     - /etc/redhat-release (RHEL/CentOS)
     - /etc/arch-release (Arch)
 
     Returns:
-        LinuxDistro если дистрибутив определен, иначе None.
+        LinuxDistro if detected, otherwise None.
     """
-    # Попробуем /etc/os-release сначала (современный стандарт)
+    # Try /etc/os-release first (modern standard)
     os_release = Path("/etc/os-release")
     if os_release.exists():
         try:
@@ -41,7 +40,7 @@ def detect_linux_distro() -> LinuxDistro | None:
                     line = line.strip()
                     if "=" in line and not line.startswith("#"):
                         key, value = line.split("=", 1)
-                        # Убираем кавычки из значения
+                        # Strip quotes from values
                         value = value.strip('"').strip("'")
                         os_release_data[key.lower()] = value
 
@@ -52,9 +51,9 @@ def detect_linux_distro() -> LinuxDistro | None:
             if name and distro_id:
                 return LinuxDistro(name=name, version=version, id=distro_id)
         except Exception as e:
-            logger.debug(f"Ошибка при чтении /etc/os-release: {e}")
+            logger.debug("Error reading /etc/os-release: %s", e)
 
-    # Попробуем /etc/lsb-release (Ubuntu/Debian)
+    # Try /etc/lsb-release (Ubuntu/Debian)
     lsb_release = Path("/etc/lsb-release")
     if lsb_release.exists():
         try:
@@ -73,9 +72,9 @@ def detect_linux_distro() -> LinuxDistro | None:
             if distro_id:
                 return LinuxDistro(name=name, version=version, id=distro_id)
         except Exception as e:
-            logger.debug(f"Ошибка при чтении /etc/lsb-release: {e}")
+            logger.debug("Error reading /etc/lsb-release: %s", e)
 
-    # Попробуем /etc/debian_version (Debian)
+    # Try /etc/debian_version (Debian)
     debian_version = Path("/etc/debian_version")
     if debian_version.exists():
         try:
@@ -83,15 +82,15 @@ def detect_linux_distro() -> LinuxDistro | None:
                 version = f.read().strip()
             return LinuxDistro(name="Debian", version=version, id="debian")
         except Exception as e:
-            logger.debug(f"Ошибка при чтении /etc/debian_version: {e}")
+            logger.debug("Error reading /etc/debian_version: %s", e)
 
-    # Попробуем /etc/redhat-release (RHEL/CentOS/Fedora)
+    # Try /etc/redhat-release (RHEL/CentOS/Fedora)
     redhat_release = Path("/etc/redhat-release")
     if redhat_release.exists():
         try:
             with redhat_release.open(encoding="utf-8") as f:
                 content = f.read().strip()
-            # Парсим содержимое (например, "Fedora release 38 (Thirty Eight)")
+            # Parse content (e.g. "Fedora release 38 (Thirty Eight)")
             if "fedora" in content.lower():
                 return LinuxDistro(name="Fedora", version="", id="fedora")
             elif "centos" in content.lower():
@@ -101,27 +100,26 @@ def detect_linux_distro() -> LinuxDistro | None:
             else:
                 return LinuxDistro(name=content, version="", id="redhat")
         except Exception as e:
-            logger.debug(f"Ошибка при чтении /etc/redhat-release: {e}")
+            logger.debug("Error reading /etc/redhat-release: %s", e)
 
-    # Попробуем /etc/arch-release (Arch Linux)
+    # Try /etc/arch-release (Arch Linux)
     arch_release = Path("/etc/arch-release")
     if arch_release.exists():
         return LinuxDistro(name="Arch Linux", version="", id="arch")
 
-    logger.warning("Не удалось определить дистрибутив Linux")
+    logger.warning("Failed to detect Linux distribution")
     return None
 
 
 def get_installed_packages() -> set[str]:
-    """
-    Получить список установленных пакетов через package manager.
+    """Return installed package names from the system package manager.
 
     Returns:
-        Множество имен установленных пакетов.
+        Set of installed package names.
     """
     packages: set[str] = set()
 
-    # Пробуем разные package managers
+    # Try common package managers
     package_managers = [
         ("dpkg", ["-l"], lambda line: line.split()[1] if len(line.split()) > 1 else None),
         ("rpm", ["-qa"], lambda line: line.strip()),
@@ -149,11 +147,10 @@ def get_installed_packages() -> set[str]:
 
 
 def get_systemd_services() -> list[str]:
-    """
-    Получить список systemd сервисов пользователя.
+    """Return user-level systemd service names.
 
     Returns:
-        Список имен systemd сервисов.
+        List of systemd service names.
     """
     services: list[str] = []
     user_services_dir = Path.home() / ".config" / "systemd" / "user"
@@ -166,11 +163,10 @@ def get_systemd_services() -> list[str]:
 
 
 def get_flatpak_apps() -> set[str]:
-    """
-    Получить список установленных Flatpak приложений.
+    """Return installed Flatpak application names.
 
     Returns:
-        Множество имен Flatpak приложений.
+        Set of Flatpak application names.
     """
     apps: set[str] = set()
 
@@ -182,7 +178,7 @@ def get_flatpak_apps() -> set[str]:
             timeout=10,
         )
         if result.returncode == 0:
-            for line in result.stdout.splitlines()[1:]:  # Пропускаем заголовок
+            for line in result.stdout.splitlines()[1:]:  # Skip header
                 parts = line.split()
                 if parts:
                     apps.add(parts[0].split(".")[-1].lower())
@@ -193,11 +189,10 @@ def get_flatpak_apps() -> set[str]:
 
 
 def get_snap_apps() -> set[str]:
-    """
-    Получить список установленных Snap приложений.
+    """Return installed Snap application names.
 
     Returns:
-        Множество имен Snap приложений.
+        Set of Snap application names.
     """
     apps: set[str] = set()
 
@@ -209,7 +204,7 @@ def get_snap_apps() -> set[str]:
             timeout=10,
         )
         if result.returncode == 0:
-            for line in result.stdout.splitlines()[1:]:  # Пропускаем заголовок
+            for line in result.stdout.splitlines()[1:]:  # Skip header
                 parts = line.split()
                 if parts:
                     apps.add(parts[0].lower())

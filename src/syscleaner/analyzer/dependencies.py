@@ -1,4 +1,4 @@
-"""Модуль анализа зависимостей Python."""
+"""Python dependency analysis module."""
 
 import logging
 import subprocess
@@ -9,18 +9,16 @@ logger = logging.getLogger(__name__)
 
 
 def check_python_conflicts(project_path: Path) -> list[dict[str, Any]]:
-    """
-    Проверить конфликты зависимостей Python.
+    """Check Python dependency conflicts in a project.
 
     Args:
-        project_path: Путь к проекту с pyproject.toml или requirements.txt.
+        project_path: Project root with pyproject.toml or requirements.txt.
 
     Returns:
-        Список найденных конфликтов.
+        List of detected conflicts.
     """
     conflicts: list[dict[str, Any]] = []
 
-    # Проверяем наличие pyproject.toml или requirements.txt
     pyproject_toml = project_path / "pyproject.toml"
     requirements_txt = project_path / "requirements.txt"
 
@@ -28,7 +26,6 @@ def check_python_conflicts(project_path: Path) -> list[dict[str, Any]]:
         return conflicts
 
     try:
-        # Пробуем использовать uv pip check для проверки конфликтов
         result = subprocess.run(
             ["uv", "pip", "check"],
             cwd=project_path,
@@ -38,7 +35,6 @@ def check_python_conflicts(project_path: Path) -> list[dict[str, Any]]:
         )
 
         if result.returncode != 0 and result.stdout:
-            # Парсим вывод uv pip check
             for line in result.stdout.splitlines():
                 if "has requirement" in line.lower() or "conflicts" in line.lower():
                     conflicts.append(
@@ -50,32 +46,29 @@ def check_python_conflicts(project_path: Path) -> list[dict[str, Any]]:
                     )
 
     except (FileNotFoundError, subprocess.TimeoutExpired) as e:
-        logger.debug(f"Не удалось проверить конфликты зависимостей: {e}")
+        logger.debug("Failed to check dependency conflicts: %s", e)
 
     return conflicts
 
 
 def find_unused_dependencies(project_path: Path) -> list[dict[str, Any]]:
-    """
-    Найти неиспользуемые зависимости в проекте.
+    """Find dependencies that may be unused in project code.
 
     Args:
-        project_path: Путь к проекту.
+        project_path: Project root.
 
     Returns:
-        Список потенциально неиспользуемых зависимостей.
+        List of potentially unused dependencies.
     """
     unused: list[dict[str, Any]] = []
 
-    # Простая проверка: ищем импорты в коде и сравниваем с зависимостями
-    # Это базовая реализация, можно улучшить используя AST анализ
+    # Basic import scan; can be improved with AST analysis
 
     pyproject_toml = project_path / "pyproject.toml"
     if not pyproject_toml.exists():
         return unused
 
     try:
-        # Parse pyproject.toml for dependencies (Python 3.12+ has tomllib in stdlib)
         import tomllib
 
         with pyproject_toml.open("rb") as f:
@@ -85,17 +78,14 @@ def find_unused_dependencies(project_path: Path) -> list[dict[str, Any]]:
         if "project" in data and "dependencies" in data["project"]:
             dependencies = data["project"]["dependencies"]
 
-        # Ищем все Python файлы в проекте
         python_files = list(project_path.rglob("*.py"))
         if not python_files:
             return unused
 
-        # Собираем все импорты
         imports: set[str] = set()
         for py_file in python_files:
             try:
                 content = py_file.read_text(encoding="utf-8")
-                # Простой парсинг импортов (можно улучшить через AST)
                 for line in content.splitlines():
                     if line.strip().startswith("import ") or line.strip().startswith("from "):
                         parts = line.strip().split()
@@ -105,13 +95,10 @@ def find_unused_dependencies(project_path: Path) -> list[dict[str, Any]]:
             except Exception:
                 continue
 
-        # Сравниваем зависимости с импортами
         for dep in dependencies:
-            # Извлекаем имя пакета из зависимости (может быть "package>=1.0.0")
             dep_name = dep.split(">=")[0].split("==")[0].split("@")[0].strip().split("[")[0]
             dep_name_normalized = dep_name.replace("-", "_").lower()
 
-            # Проверяем, используется ли зависимость
             is_used = False
             for imp in imports:
                 imp_lower = imp.lower()
@@ -129,25 +116,23 @@ def find_unused_dependencies(project_path: Path) -> list[dict[str, Any]]:
                 )
 
     except Exception as e:
-        logger.debug(f"Ошибка при поиске неиспользуемых зависимостей: {e}")
+        logger.debug("Error finding unused dependencies: %s", e)
 
     return unused
 
 
 def check_outdated_dependencies(project_path: Path) -> list[dict[str, Any]]:
-    """
-    Проверить устаревшие зависимости.
+    """Check for outdated Python dependencies.
 
     Args:
-        project_path: Путь к проекту.
+        project_path: Project root.
 
     Returns:
-        Список устаревших зависимостей.
+        List of outdated packages.
     """
     outdated: list[dict[str, Any]] = []
 
     try:
-        # Используем uv pip list для получения списка пакетов
         result = subprocess.run(
             ["uv", "pip", "list", "--outdated"],
             cwd=project_path,
@@ -158,8 +143,7 @@ def check_outdated_dependencies(project_path: Path) -> list[dict[str, Any]]:
 
         if result.returncode == 0 and result.stdout:
             lines = result.stdout.splitlines()
-            # Пропускаем заголовок
-            for line in lines[2:]:
+            for line in lines[2:]:  # Skip header
                 parts = line.split()
                 if len(parts) >= 3:
                     outdated.append(
@@ -172,27 +156,25 @@ def check_outdated_dependencies(project_path: Path) -> list[dict[str, Any]]:
                     )
 
     except (FileNotFoundError, subprocess.TimeoutExpired) as e:
-        logger.debug(f"Не удалось проверить устаревшие зависимости: {e}")
+        logger.debug("Failed to check outdated dependencies: %s", e)
 
     return outdated
 
 
 def analyze_python_dependencies(projects_dirs: list[Path]) -> dict[str, Any]:
-    """
-    Анализировать Python зависимости во всех проектах.
+    """Analyze Python dependencies across project directories.
 
     Args:
-        projects_dirs: Список директорий с проектами.
+        projects_dirs: Directories containing projects.
 
     Returns:
-        Словарь с результатами анализа.
+        Aggregated dependency analysis results.
     """
     all_conflicts: list[dict[str, Any]] = []
     all_unused: list[dict[str, Any]] = []
     all_outdated: list[dict[str, Any]] = []
     python_projects: list[Path] = []
 
-    # Ищем все проекты с pyproject.toml или requirements.txt во всех директориях
     for projects_dir in projects_dirs:
         if not projects_dir.exists() or not projects_dir.is_dir():
             continue
@@ -205,9 +187,9 @@ def analyze_python_dependencies(projects_dirs: list[Path]) -> dict[str, Any]:
                     ).exists():
                         python_projects.append(project_path)
         except Exception as e:
-            logger.debug(f"Ошибка при сканировании {projects_dir}: {e}")
+            logger.debug("Error scanning %s: %s", projects_dir, e)
 
-    logger.info(f"Найдено {len(python_projects)} Python проектов")
+    logger.info("Found %d Python projects", len(python_projects))
 
     for project in python_projects:
         conflicts = check_python_conflicts(project)

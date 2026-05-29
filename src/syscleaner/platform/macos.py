@@ -1,14 +1,13 @@
-"""Платформо-специфичные функции для macOS."""
+"""macOS-specific platform helpers."""
 
 from pathlib import Path
 
 
 def get_installed_apps() -> set[str]:
-    """
-    Получить список установленных приложений macOS.
+    """Return installed macOS application names.
 
     Returns:
-        Множество имен установленных приложений (без .app расширения).
+        Set of application names (without the .app extension).
     """
     apps_dir = Path("/Applications")
     installed_apps: set[str] = set()
@@ -21,11 +20,10 @@ def get_installed_apps() -> set[str]:
 
 
 def get_launch_agents_paths() -> list[Path]:
-    """
-    Получить пути к LaunchAgents и LaunchDaemons.
+    """Return LaunchAgents and LaunchDaemons directory paths.
 
     Returns:
-        Список путей к директориям LaunchAgents и LaunchDaemons.
+        List of existing LaunchAgents and LaunchDaemons paths.
     """
     home = Path.home()
     paths = [

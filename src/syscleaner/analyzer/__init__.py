@@ -1,4 +1,4 @@
-"""Модули анализа системы."""
+"""System analysis modules."""
 
 from syscleaner.analyzer.dependencies import analyze_python_dependencies
 from syscleaner.analyzer.ml_cache import scan_ml_cache

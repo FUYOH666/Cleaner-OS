@@ -37,11 +37,22 @@ uv run syscleaner plan --from-scan scan.json
 uv run syscleaner apply --from-scan scan.json --dry-run
 ```
 
-Install as a tool:
+Install:
 
 ```bash
+pip install syscleaner
+# or
+uv tool install syscleaner
 uv tool install git+https://github.com/FUYOH666/Cleaner-OS.git
 syscleaner health
+```
+
+Optional extras:
+
+```bash
+uv sync --extra tui --extra mcp
+syscleaner tui --from-scan scan.json
+syscleaner-mcp   # MCP server — see docs/MCP.md
 ```
 
 ---
@@ -69,10 +80,19 @@ syscleaner health
 syscleaner healthz
 syscleaner export-schema -o scan-bundle.schema.json
 
+# TUI (optional)
+syscleaner tui --from-scan scan.json
+
+# Language
+syscleaner scan --all --lang ru
+export SYSCLEANER_LANG=ru
+
 # Profiles (in config.yaml): default | ml-workstation | ios-dev | minimal
 ```
 
 Aliases: `system-cleaner`
+
+See [docs/MCP.md](docs/MCP.md) for Cursor/IDE integration.
 
 ---
 

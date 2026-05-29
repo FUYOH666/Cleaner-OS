@@ -29,6 +29,13 @@ jobs:
       - name: Sync dependencies
         run: uv sync --all-groups
 
+      - name: No Cyrillic in source
+        run: |
+          if rg '[А-Яа-яЁё]' src/; then
+            echo "Russian text found in src/ — use English for docstrings and logs"
+            exit 1
+          fi
+
       - name: Ruff
         run: uv run ruff check .
 
@@ -40,3 +47,13 @@ jobs:
 
       - name: CLI smoke test
         run: uv run syscleaner health
+
+  extras:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv python install 3.12
+      - run: uv sync --all-groups --all-extras
+      - run: uv run pytest -q
+      - run: uv run syscleaner health --lang ru

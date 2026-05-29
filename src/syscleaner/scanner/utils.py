@@ -1,17 +1,17 @@
-"""Общие утилиты для сканирования."""
+"""Shared scanning utilities."""
 
 from pathlib import Path
 
 
 def get_directory_size(path: Path) -> int:
     """
-    Получить размер директории в байтах.
+    Return directory size in bytes.
 
     Args:
-        path: Путь к директории.
+        path: Directory path.
 
     Returns:
-        Размер в байтах.
+        Total size in bytes.
     """
     total_size = 0
     try:
@@ -28,13 +28,13 @@ def get_directory_size(path: Path) -> int:
 
 def format_size(size_bytes: int) -> tuple[float, str]:
     """
-    Форматировать размер в читаемый формат.
+    Format a byte size for display.
 
     Args:
-        size_bytes: Размер в байтах.
+        size_bytes: Size in bytes.
 
     Returns:
-        Кортеж (размер, единица измерения).
+        Tuple of (numeric value, unit label).
     """
     value: float = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:

@@ -1,4 +1,4 @@
-"""Модуль сканирования скрытых файлов."""
+"""Hidden file scan module."""
 
 import logging
 from typing import Any
@@ -10,22 +10,21 @@ logger = logging.getLogger(__name__)
 
 
 def scan_hidden_files(paths: PlatformPaths, min_size_mb: float = 100) -> list[dict[str, Any]]:
-    """
-    Сканировать скрытые файлы и директории в домашней директории.
+    """Scan hidden files and directories in the home directory.
 
     Args:
-        paths: Объект PlatformPaths для получения путей.
-        min_size_mb: Минимальный размер для отчета в MB.
+        paths: PlatformPaths instance for resolving paths.
+        min_size_mb: Minimum size in MB to include in the report.
 
     Returns:
-        Список найденных больших скрытых файлов/директорий.
+        List of large hidden files and directories.
     """
     results: list[dict[str, Any]] = []
     home = paths.home
     min_size_bytes = int(min_size_mb * 1024 * 1024)
 
     try:
-        # Сканируем домашнюю директорию на скрытые файлы
+        # Scan home directory for hidden entries
         for item in home.iterdir():
             if item.name.startswith("."):
                 try:
@@ -63,9 +62,9 @@ def scan_hidden_files(paths: PlatformPaths, min_size_mb: float = 100) -> list[di
                         except (OSError, PermissionError):
                             continue
                 except (OSError, PermissionError) as e:
-                    logger.debug(f"Ошибка при сканировании {item}: {e}")
+                    logger.debug("Error scanning %s: %s", item, e)
                     continue
     except Exception as e:
-        logger.error(f"Ошибка при сканировании скрытых файлов: {e}")
+        logger.error("Error scanning hidden files: %s", e)
 
     return sorted(results, key=lambda x: x["size_bytes"], reverse=True)

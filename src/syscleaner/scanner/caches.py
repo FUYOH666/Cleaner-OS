@@ -1,4 +1,4 @@
-"""Модуль сканирования кэшей."""
+"""Cache directory scanning."""
 
 import logging
 from typing import Any
@@ -11,27 +11,26 @@ logger = logging.getLogger(__name__)
 
 def scan_caches(paths: PlatformPaths, exclude_paths: list[str]) -> list[dict[str, Any]]:
     """
-    Сканировать кэши.
+    Scan user cache directories.
 
     Args:
-        paths: Объект PlatformPaths для получения путей.
-        exclude_paths: Пути для исключения.
+        paths: Platform path resolver.
+        exclude_paths: Path substrings to skip.
 
     Returns:
-        Список найденных кэшей.
+        List of cache entries with size metadata.
     """
     results: list[dict[str, Any]] = []
     caches_dir = paths.cache_dir()
 
     if not caches_dir.exists():
-        logger.warning(f"Директория кэшей не найдена: {caches_dir}")
+        logger.warning("Cache directory not found: %s", caches_dir)
         return results
 
     try:
         for cache_dir in caches_dir.iterdir():
             if cache_dir.is_dir():
                 cache_path_str = str(cache_dir)
-                # Проверяем исключения
                 if any(exclude in cache_path_str for exclude in exclude_paths):
                     continue
 
@@ -49,8 +48,8 @@ def scan_caches(paths: PlatformPaths, exclude_paths: list[str]) -> list[dict[str
                         },
                     )
     except PermissionError:
-        logger.error(f"Нет доступа к директории кэшей: {caches_dir}")
+        logger.error("Permission denied reading cache directory: %s", caches_dir)
     except Exception as e:
-        logger.error(f"Ошибка при сканировании кэшей: {e}")
+        logger.error("Error scanning caches: %s", e)
 
     return sorted(results, key=lambda x: x["size_bytes"], reverse=True)

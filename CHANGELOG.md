@@ -2,6 +2,35 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.1.0] - 2026-05-29
+
+### Added
+
+- CLI i18n: `--lang en|ru` and `SYSCLEANER_LANG`
+- Optional extras: `tui` (Textual), `mcp` (MCP server with `syscleaner-mcp`)
+- Hugging Face CLI enrichment via `hf cache ls` when available
+- PyPI publishing workflow (tag `v*` triggers publish)
+- Social preview image in `docs/assets/`
+
+### Changed
+
+- All legacy `src/` docstrings in English; CI blocks Cyrillic in `src/`
+- Russian changelog archived to `docs/history/CHANGELOG-legacy-ru.md`
+
+## [1.0.1] - 2026-05-29
+
+### Changed
+
+- All `src/` docstrings, comments, and log messages in English
+- CI gate: fail if Cyrillic appears under `src/`
+- Legacy Russian changelog moved to [docs/history/CHANGELOG-legacy-ru.md](docs/history/CHANGELOG-legacy-ru.md)
+- Dependabot removed; dev dependencies consolidated in `dependency-groups.dev`
+
+### Added
+
+- Branch protection documentation for `main`
+- Social preview asset under `docs/assets/`
+
 ## [1.0.0] - 2026-05-29
 
 ### Added
@@ -56,106 +85,12 @@ All notable changes to this project are documented in this file.
 
 - `config.yaml` from repository (user config; use `config.yaml.example` as template)
 
-## [0.2.1] - 2025-11-04
+## Older releases
 
-### Добавлено
-- ✅ Утилиты для мониторинга системы:
-  - `scripts/system_health_check.sh.example` - комплексная проверка системы (GPU, CPU, память, диск, сервисы, Docker GPU)
-  - `scripts/backup_configs.sh.example` - резервное копирование критичных конфигураций
-  - `scripts/README.md` - документация по использованию скриптов
-- ✅ Улучшенная конфигурация для Linux:
-  - `config.yaml.example` с Linux-специфичными исключениями:
-    - `.cargo/` - Rust кэш (исключение ложных срабатываний безопасности)
-    - `.bun/` - Bun кэш (исключение ложных срабатываний)
-    - `.rustup/` - Rustup кэш (исключение ложных срабатываний)
-    - `~/.cache/Cursor/` - Cursor IDE кэш (опционально)
-    - `~/.config/Cursor/logs/` - Cursor логи (опционально)
-- ✅ Обновленная документация:
-  - Секция о дополнительных скриптах в README.md
-  - Инструкции по использованию скриптов для мониторинга и бэкапов
+Detailed notes for v0.2.x and v0.1.0 (Russian) are archived in [docs/history/CHANGELOG-legacy-ru.md](docs/history/CHANGELOG-legacy-ru.md).
 
-### Изменено
-- 🔄 Обновлен `.gitignore` для защиты персональных данных:
-  - Исключены директории `reports/` и `backups/`
-  - Исключены персональные файлы (whitelist моделей, отчеты)
-- 🔄 Улучшен `config.yaml.example`:
-  - Добавлены комментарии для всех секций
-  - Добавлены Linux-специфичные исключения для оптимизации сканирования
-
-### Безопасность
-- ✅ Защита от случайной утечки персональных данных в репозиторий
-- ✅ Улучшенная конфигурация снижает ложные срабатывания безопасности
-
-## [0.2.0] - 2025-11-04
-
-### Добавлено
-- ✅ Кроссплатформенная поддержка (macOS и Linux)
-- ✅ Автоматическая адаптация под систему пользователя:
-  - Автоматический поиск проектов разработки в стандартных местах (`~/development/`, `~/dev/`, `~/projects/`, `~/code/`, и др.)
-  - Определение дистрибутива Linux для более точной адаптации путей
-  - Определение GPU (NVIDIA, AMD, Intel, Metal) и информации о диске
-  - Автоматическое определение домашней директории и путей к кэшам
-- ✅ Анализ ML кэшей (Hugging Face, PyTorch, TensorFlow)
-  - Определение неиспользуемых моделей (старше 30 дней)
-  - Анализ размера кэшей по типам
-  - Рекомендации по очистке неиспользуемых моделей
-- ✅ Анализ зависимостей Python
-  - Проверка конфликтов зависимостей
-  - Поиск неиспользуемых зависимостей
-  - Проверка устаревших зависимостей
-- ✅ Платформо-независимый слой (PlatformPaths)
-  - Автоматическое определение платформы
-  - Единый интерфейс для путей macOS и Linux
-- ✅ Поддержка Linux package managers (apt, yum, dnf, pacman)
-- ✅ Поддержка Flatpak и Snap приложений (Linux)
-- ✅ Улучшенные отчеты с информацией о ML кэшах и зависимостях
-- ✅ Вывод топ-10 критических проблем безопасности прямо в консоль
-- ✅ Объяснение, почему проблема критична (риски)
-
-### Изменено
-- 🔄 Переименование проекта: `macos-audit` → `syscleaner`
-- 🔄 Переименование модуля: `macos_audit` → `syscleaner`
-- 🔄 Рефакторинг структуры проекта
-  - Модульная структура (platform/, scanner/, analyzer/)
-  - Разделение ответственности между модулями
-- 🔄 Обновление команды: `macos-audit` → `syscleaner` (также доступен `system-cleaner`)
-- 🔄 Обновление конфигурации для поддержки обеих платформ
-- 🔄 Улучшен формат отчета с группировкой по уровням серьезности
-- 🔄 Команда `scan` теперь автоматически находит проекты в разных местах
-- 🔄 Команда `health` показывает информацию о системе (GPU, диск, дистрибутив Linux)
-
-### Удалено
-- ❌ macOS-специфичные хардкоды путей
-- ❌ Проверка платформы из health команды (теперь определяется автоматически)
-- ❌ Ненужные MD-файлы по настройке Cursor (CURSOR_EXTENSIONS_*.md, SSH_*.md, MCP_*.md)
-- ❌ Временные файлы (scan_results*.json, fix_ssh_config.sh)
-
-### Исправлено
-- ✅ Пути к кэшам теперь определяются автоматически для обеих платформ
-- ✅ Пути к логам корректно определяются для Linux
-- ✅ Пути к Application Support корректно определяются для Linux (~/.local/share)
-- ✅ Исправлены ложные срабатывания проверки безопасности:
-  - Игнорируются файлы в расширениях редакторов (.cursor/extensions, .vscode/extensions)
-  - Игнорируются файлы в кэшах приложений (Library/Caches/)
-  - Игнорируются type stubs (.pyi файлы) и заголовочные файлы C/C++ (.h, .hpp)
-  - Игнорируются файлы стандартных библиотек Python и системных установщиков (uv, conda, pip)
-  - Игнорируются файлы в node_modules, dist, build и других артефактах сборки
-  - Реальные .env файлы в проектах разработки теперь правильно проверяются
-
-### Безопасность
-- ✅ Все проверки безопасности теперь кроссплатформенные
-- ✅ SSH проверки работают на обеих платформах
-- ✅ Устранены тысячи ложных срабатываний на файлы библиотек и расширений
-
-## [0.1.0] - 2025-10-XX
-
-### Добавлено
-- ✅ Базовая функциональность сканирования macOS
-- ✅ Проверка безопасности
-- ✅ Анализ кэшей и остатков приложений
-- ✅ Сканирование артефактов проектов
-- ✅ Генерация отчетов (Markdown и JSON)
-
+[1.1.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v0.3.0...v1.0.0
 [0.3.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v0.2.1...v0.3.0
 [0.2.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v0.1.0...v0.2.0

@@ -1,4 +1,4 @@
-"""Точка входа для запуска как модуль: python -m syscleaner."""
+"""Entry point for module execution: python -m syscleaner."""
 
 from syscleaner.main import main
 

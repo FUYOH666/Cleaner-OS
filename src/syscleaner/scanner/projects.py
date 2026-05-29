@@ -1,4 +1,4 @@
-"""Модуль сканирования артефактов проектов."""
+"""Project artifact scan module."""
 
 import logging
 from collections import defaultdict
@@ -14,26 +14,25 @@ def scan_project_artifacts(
     projects_dirs: list[Path],
     safe_patterns: list[str],
 ) -> list[dict[str, Any]]:
-    """
-    Сканировать проекты на артефакты сборки и мусор.
+    """Scan projects for build artifacts and clutter.
 
     Args:
-        projects_dirs: Список директорий с проектами.
-        safe_patterns: Паттерны безопасных для удаления файлов.
+        projects_dirs: Directories containing projects.
+        safe_patterns: Patterns for files safe to delete.
 
     Returns:
-        Список найденных артефактов.
+        List of discovered artifacts grouped by type.
     """
     results: list[dict[str, Any]] = []
     artifact_types: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
     for projects_dir in projects_dirs:
         if not projects_dir.exists():
-            logger.debug(f"Директория проектов не найдена: {projects_dir}")
+            logger.debug("Projects directory not found: %s", projects_dir)
             continue
 
         try:
-            # Ищем стандартные артефакты
+            # Standard artifact patterns
             patterns = {
                 "__pycache__": "**/__pycache__",
                 ".pytest_cache": "**/.pytest_cache",
@@ -69,9 +68,9 @@ def scan_project_artifacts(
                                 },
                             )
         except Exception as e:
-            logger.debug(f"Ошибка при сканировании артефактов в {projects_dir}: {e}")
+            logger.debug("Error scanning artifacts in %s: %s", projects_dir, e)
 
-    # Формируем результаты по типам
+    # Aggregate results by artifact type
     for artifact_name, artifacts in artifact_types.items():
         total_size = sum(a["size_bytes"] for a in artifacts)
         total_size_mb = total_size / (1024 * 1024)
@@ -83,7 +82,7 @@ def scan_project_artifacts(
                 "total_size_bytes": total_size,
                 "total_size_mb": total_size_mb,
                 "total_size_formatted": f"{total_size_formatted[0]:.2f} {total_size_formatted[1]}",
-                "items": artifacts[:10],  # Показываем только первые 10
+                "items": artifacts[:10],  # Show only the first 10 items
             },
         )
 

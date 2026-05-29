@@ -17,19 +17,18 @@ def generate_markdown_report(
     dependency_results: dict[str, Any] | None = None,
     platform: str = "Unknown",
 ) -> str:
-    """
-    Сгенерировать Markdown отчет.
+    """Generate a Markdown report.
 
     Args:
-        scan_results: Результаты сканирования.
-        security_results: Результаты проверки безопасности.
-        cleanup_analysis: Анализ возможностей очистки.
-        ml_cache_results: Результаты анализа ML кэшей.
-        dependency_results: Результаты анализа зависимостей.
-        platform: Платформа системы.
+        scan_results: Scan results.
+        security_results: Security check results.
+        cleanup_analysis: Cleanup opportunity analysis.
+        ml_cache_results: ML cache analysis results.
+        dependency_results: Dependency analysis results.
+        platform: System platform name.
 
     Returns:
-        Markdown отчет в виде строки.
+        Markdown report as a string.
     """
     report_lines: list[str] = []
 
@@ -61,7 +60,7 @@ def generate_markdown_report(
         )
         report_lines.append("\n")
 
-        # Детали по типам кэшей
+        # Breakdown by cache type
         if ml_cache_results.get("models_by_type"):
             report_lines.append("### By cache type\n")
             report_lines.append("| Type | Count | Size |\n")
@@ -71,7 +70,7 @@ def generate_markdown_report(
                 report_lines.append(f"| {cache_type} | {len(models)} | {total_size:.2f} GB |\n")
             report_lines.append("\n")
 
-        # Топ моделей по размеру
+        # Top models by size
         if ml_cache_results.get("models"):
             report_lines.append("### Top models by size\n")
             report_lines.append("| Model | Size | Type |\n")
@@ -95,7 +94,7 @@ def generate_markdown_report(
         report_lines.append(f"- **Outdated dependencies:** {n_outdated}\n")
         report_lines.append("\n")
 
-        # Конфликты
+        # Conflicts
         if dependency_results.get("conflicts"):
             report_lines.append("### Dependency Conflicts\n")
             report_lines.append("| Project | Message |\n")
@@ -104,7 +103,7 @@ def generate_markdown_report(
                 report_lines.append(f"| `{conflict['project']}` | {conflict['message']} |\n")
             report_lines.append("\n")
 
-        # Неиспользуемые зависимости
+        # Unused dependencies
         if dependency_results.get("unused_dependencies"):
             report_lines.append("### Unused Dependencies\n")
             report_lines.append("| Project | Dependency | Reason |\n")
@@ -231,19 +230,18 @@ def generate_json_report(
     dependency_results: dict[str, Any] | None = None,
     platform: str = "Unknown",
 ) -> str:
-    """
-    Сгенерировать JSON отчет.
+    """Generate a JSON report.
 
     Args:
-        scan_results: Результаты сканирования.
-        security_results: Результаты проверки безопасности.
-        cleanup_analysis: Анализ возможностей очистки.
-        ml_cache_results: Результаты анализа ML кэшей.
-        dependency_results: Результаты анализа зависимостей.
-        platform: Платформа системы.
+        scan_results: Scan results.
+        security_results: Security check results.
+        cleanup_analysis: Cleanup opportunity analysis.
+        ml_cache_results: ML cache analysis results.
+        dependency_results: Dependency analysis results.
+        platform: System platform name.
 
     Returns:
-        JSON отчет в виде строки.
+        JSON report as a string.
     """
     report = {
         "timestamp": datetime.now().isoformat(),
@@ -267,16 +265,15 @@ def save_report(
     output_path: Path,
     format_type: str = "markdown",
 ) -> None:
-    """
-    Сохранить отчет в файл.
+    """Save a report to a file.
 
     Args:
-        report_content: Содержимое отчета.
-        output_path: Путь для сохранения.
-        format_type: Тип формата (markdown или json).
+        report_content: Report body.
+        output_path: Output file path.
+        format_type: Report format (markdown or json).
 
     Raises:
-        ValueError: Если формат не поддерживается.
+        ValueError: If the format is not supported.
     """
     if format_type not in ["markdown", "json"]:
         raise ValueError(f"Unsupported format: {format_type}")
