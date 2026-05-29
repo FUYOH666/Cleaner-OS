@@ -47,6 +47,11 @@ git push origin v1.0.0
 
 Copy notes from [CHANGELOG.md](../CHANGELOG.md) into the GitHub Release.
 
-## Dependabot PRs
+## Dependencies
 
-Open PRs #1 and #2 are dependency bumps — merge after CI passes on main.
+Dependabot is **disabled** (no `.github/dependabot.yml`). Update deps intentionally:
+
+```bash
+uv lock --upgrade-package <name>
+uv run pytest && uv run ruff check .
+```

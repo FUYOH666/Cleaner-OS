@@ -22,7 +22,7 @@ Offline review before v1.0.0 release. Status: **addressed in main**.
 
 - **Russian docstrings** in legacy `scanner/` and `platform/` modules (internal; does not affect CLI UX).
 - **Social preview image** — add `docs/assets/social-preview.png` manually (see `docs/assets/README.md`).
-- **Dependabot PRs #1/#2** — rebase or close after CI on `main` passes; may be superseded by `uv.lock` bump in v1.0.
+- **Dependabot** — disabled; stale PR branches removed.
 - **PyPI publish** — optional; install via `uv tool install git+...` documented in README.
 - **Phase 2 plan items** (TUI, MCP, i18n) — deferred to v1.1+.
 
