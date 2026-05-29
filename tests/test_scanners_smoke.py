@@ -10,12 +10,11 @@ from syscleaner.scanner.trash import scan_trash
 def test_scan_caches_finds_dir(tmp_path: Path) -> None:
     home = tmp_path / "home"
     home.mkdir()
-    cache_root = home / "Library" / "Caches"
-    app_cache = cache_root / "TestApp"
+    paths = PlatformPaths(home=home)
+    app_cache = paths.cache_dir() / "TestApp"
     app_cache.mkdir(parents=True)
     (app_cache / "blob").write_bytes(b"x" * 5000)
 
-    paths = PlatformPaths(home=home)
     results = scan_caches(paths, exclude_paths=[])
     assert len(results) >= 1
     assert results[0]["size_mb"] > 0
