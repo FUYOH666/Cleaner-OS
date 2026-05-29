@@ -5,6 +5,7 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/FUYOH666/Cleaner-OS/actions/workflows/ci.yml/badge.svg)](https://github.com/FUYOH666/Cleaner-OS/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/syscleaner.svg)](https://pypi.org/project/syscleaner/)
 
 One scan surfaces caches, AI-era IDE junk, ML models, dependency issues, and security risks. You get structured reports and an optional **safe apply** path that prefers official tools (`uv`, `hf`, `brew`) over blind `rm`.
 
@@ -63,6 +64,7 @@ syscleaner-mcp   # MCP server — see docs/MCP.md
 # Scan
 syscleaner scan --all
 syscleaner scan --caches --security --ml-cache --dependencies --projects
+syscleaner scan --duplicates   # optional duplicate finder (slower)
 
 # Reports
 syscleaner scan --all --save-results scan.json
@@ -94,6 +96,19 @@ syscleaner scan --all
 Aliases: `system-cleaner`
 
 See [docs/MCP.md](docs/MCP.md) for Cursor/IDE integration.
+
+### GitHub Action (SARIF)
+
+Use [`.github/actions/scan`](.github/actions/scan) or copy [examples/workflow-sarif.yml](examples/workflow-sarif.yml).
+
+### Compare
+
+| | syscleaner | Generic cleaners | dev-only tools |
+|---|:---:|:---:|:---:|
+| Dev caches (uv, HF, Cursor) | yes | partial | yes |
+| Security + SARIF | yes | rare | no |
+| Tiered apply + dry-run default | yes | no | varies |
+| MCP + structured JSON | yes | no | no |
 
 ---
 

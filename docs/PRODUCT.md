@@ -22,7 +22,7 @@ Free, open-source CLI that helps developers and power users **understand** what 
 
 - **i18n**: English (default) and Russian CLI via `--lang` / `SYSCLEANER_LANG`
 - **TUI** (optional): Textual UI over saved scan JSON
-- **MCP** (optional): read-only tools for agents; `apply` gated by `allow_execute`
+- **MCP** (optional): `scan_summary`, `export_plan`, `health`; `apply_plan_tool` only with `allow_execute=true`
 - **PyPI**: `pip install syscleaner` (after trusted-publisher setup on PyPI)
 
 ## Non-goals (v1.x)

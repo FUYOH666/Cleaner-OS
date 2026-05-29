@@ -67,7 +67,12 @@ def apply_plan(
             _execute_action(action)
             result.executed += 1
             result.messages.append(f"OK: {action.title}")
-        except Exception as e:
+        except (
+            OSError,
+            subprocess.CalledProcessError,
+            ValueError,
+            FileNotFoundError,
+        ) as e:
             result.failed += 1
             logger.error("Apply failed for %s: %s", action.title, e)
             result.messages.append(f"FAIL: {action.title} — {e}")

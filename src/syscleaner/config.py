@@ -12,6 +12,8 @@ from syscleaner.profiles import merge_profile
 
 logger = logging.getLogger(__name__)
 
+_LOG_LEVELS = frozenset({"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"})
+
 
 class ScanConfig(BaseModel):
     """Scan settings."""
@@ -86,14 +88,29 @@ class Settings(BaseSettings):
     """Application settings."""
 
     profile: str = Field(default="default", description="Policy profile name")
+    log_level: str = Field(default="INFO", description="Root log level (LOG_LEVEL)")
     scan: ScanConfig = Field(default_factory=ScanConfig)
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     cleanup: CleanupConfig = Field(default_factory=CleanupConfig)
     recognizers: RecognizersConfig = Field(default_factory=RecognizersConfig)
 
     model_config = SettingsConfigDict(
+        env_file=".env",
         env_nested_delimiter="__",
         env_file_encoding="utf-8",
+    )
+
+
+def configure_logging(level: str | None = None) -> None:
+    """Apply LOG_LEVEL to root logger (idempotent)."""
+    name = (level or os.environ.get("LOG_LEVEL", "INFO")).upper()
+    if name not in _LOG_LEVELS:
+        logger.warning("Invalid LOG_LEVEL=%s, using INFO", level)
+        name = "INFO"
+    logging.basicConfig(
+        level=getattr(logging, name),
+        format="%(asctime)s %(levelname)-8s syscleaner %(message)s",
+        force=True,
     )
 
 
@@ -146,6 +163,6 @@ def load_config(config_path: str | Path | None = None) -> Settings:
         logger.info("Config loaded from %s (profile=%s)", config_path, settings.profile)
         return settings
 
-    except Exception as e:
+    except (yaml.YAMLError, OSError, ValueError, TypeError) as e:
         logger.error("Config load error from %s: %s", config_path, e)
         raise

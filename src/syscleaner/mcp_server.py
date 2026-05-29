@@ -57,6 +57,40 @@ def export_plan(scan_json_path: str, tier: str = "moderate") -> str:
     return plan.model_dump_json(indent=2)
 
 
+@mcp.tool()
+def apply_plan_tool(
+    scan_json_path: str,
+    tier: str = "safe",
+    allow_execute: bool = False,
+    dry_run: bool = True,
+) -> str:
+    """Apply cleanup plan. Requires allow_execute=true to run; defaults to dry-run."""
+    from syscleaner.apply.orchestrator import apply_plan as run_apply
+    from syscleaner.models.entities import RiskTier
+
+    if not allow_execute:
+        dry_run = True
+    bundle = load_scan_bundle(_load(scan_json_path))
+    plan = build_plan_from_bundle(bundle, max_risk=RiskTier(tier))
+    result = run_apply(
+        plan,
+        dry_run=dry_run,
+        max_risk=RiskTier(tier),
+        allow_risky=False,
+        yes=allow_execute and not dry_run,
+    )
+    return json.dumps(
+        {
+            "dry_run": result.dry_run,
+            "executed": result.executed,
+            "skipped": result.skipped,
+            "failed": result.failed,
+            "messages": result.messages[:50],
+        },
+        indent=2,
+    )
+
+
 def main() -> None:
     """Run MCP server over stdio."""
     mcp.run()

@@ -37,8 +37,9 @@ Add to `.cursor/mcp.json` (adjust paths):
 | `health` | Version and readiness |
 | `scan_summary` | Summarize a saved `--save-results` JSON file |
 | `export_plan` | Build cleanup plan JSON (`tier`: safe, moderate, risky) |
+| `apply_plan_tool` | Apply plan; requires `allow_execute=true`; defaults to dry-run |
 
-Apply/destructive actions are **not** exposed via MCP by default.
+Destructive apply requires **`allow_execute=true`** explicitly.
 
 ## Workflow
 

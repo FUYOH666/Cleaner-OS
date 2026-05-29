@@ -15,7 +15,7 @@ from syscleaner import __version__
 from syscleaner.analyzer import analyze_python_dependencies, scan_ml_cache, scan_security
 from syscleaner.apply.orchestrator import apply_plan
 from syscleaner.cleanup import analyze_cleanup_opportunities
-from syscleaner.config import load_config
+from syscleaner.config import configure_logging, load_config
 from syscleaner.i18n import set_locale, t
 from syscleaner.models.entities import RiskTier, ScanBundle
 from syscleaner.plan_builder import build_plan_from_bundle
@@ -34,12 +34,8 @@ from syscleaner.scanner import (
     scan_project_artifacts,
     scan_trash,
 )
+from syscleaner.scanner.duplicates import scan_duplicate_files
 
-# Logging: time · level · service · message · metadata
-logging.basicConfig(
-    format="%(asctime)s %(levelname)-8s %(name)s %(message)s [%(pathname)s:%(lineno)d]",
-    level=logging.INFO,
-)
 logger = logging.getLogger(__name__)
 
 app = typer.Typer(
@@ -186,6 +182,10 @@ def scan(
         bool, typer.Option("--dependencies", help="Analyze dependencies")
     ] = False,
     ml_cache: Annotated[bool, typer.Option("--ml-cache", help="Analyze ML caches")] = False,
+    duplicates: Annotated[
+        bool,
+        typer.Option("--duplicates", help="Find duplicate files (MVP, slower)"),
+    ] = False,
     config_path: Annotated[str | None, typer.Option("--config", help="Path to config.yaml")] = None,
     save_results: Annotated[
         str | None,
@@ -199,6 +199,7 @@ def scan(
     """
     try:
         settings = load_config(config_path)
+        configure_logging(settings.log_level)
     except Exception as e:
         console.print(f"[red]{t('config_error')}: {e}[/red]")
         sys.exit(1)
@@ -301,6 +302,14 @@ def scan(
                 dependency_results = empty_dep_results
             progress.update(task, completed=True)
 
+        if duplicates:
+            task = progress.add_task(t("duplicates_scan"), total=None)
+            scan_results["duplicates"] = scan_duplicate_files(
+                paths,
+                min_size_mb=settings.scan.min_size_mb,
+            )
+            progress.update(task, completed=True)
+
         if all or caches or projects or ml_cache:
             task = progress.add_task("Analyzing cleanup opportunities...", total=None)
             cleanup_analysis = analyze_cleanup_opportunities(
@@ -330,6 +339,12 @@ def scan(
         bundle=bundle,
     )
     print_findings_table(bundle)
+
+    dup = scan_results.get("duplicates")
+    if dup and dup.get("group_count", 0) > 0:
+        console.print(
+            f"\n[cyan]{t('duplicates_found', count=dup['group_count'], mb=dup['waste_mb'])}[/cyan]"
+        )
 
     if security_results.get("high_severity_issues", 0) > 0:
         console.print("\n[red]Critical security issues found![/red]")
@@ -622,100 +637,110 @@ def healthz() -> None:
 
 def _health_impl() -> None:
     """Internal health check implementation."""
+    import platform as plat
+
     console.print(f"[bold]{t('health_title')}[/bold]\n")
 
     python_version = sys.version_info
     py_ver = f"{python_version.major}.{python_version.minor}.{python_version.micro}"
     if python_version.major == 3 and python_version.minor >= 12:
-        console.print(f"[green]✓[/green] Python {py_ver}")
+        console.print(f"[green]✓[/green] {t('health_python_ok', ver=py_ver)}")
     else:
-        console.print(f"[red]✗[/red] Python {py_ver} (3.12+ required)")
+        console.print(f"[red]✗[/red] {t('health_python_bad', ver=py_ver)}")
 
     if IS_MACOS:
-        import platform as plat
-
-        console.print(f"[green]✓[/green] macOS {plat.release()}")
+        console.print(f"[green]✓[/green] {t('health_macos', release=plat.release())}")
     elif IS_LINUX:
         distro = detect_linux_distro()
         if distro:
-            distro_info = f"{distro.name}"
+            distro_info = distro.name
             if distro.version:
                 distro_info += f" {distro.version}"
-            console.print(f"[green]✓[/green] Linux ({distro_info})")
+            console.print(f"[green]✓[/green] {t('health_linux', distro=distro_info)}")
         else:
-            import platform as plat
-
-            console.print(f"[green]✓[/green] Linux {plat.release()}")
+            console.print(f"[green]✓[/green] {t('health_linux_plain', release=plat.release())}")
     else:
-        import platform as plat
+        console.print(
+            f"[yellow]⚠[/yellow] {t('health_unsupported_platform', system=plat.system())}"
+        )
 
-        console.print(f"[yellow]⚠[/yellow] Unsupported platform: {plat.system()}")
-
-    console.print("\n[bold]System info:[/bold]")
+    console.print(f"\n[bold]{t('health_system_info')}[/bold]")
 
     gpu_info = detect_gpu()
     if gpu_info.has_gpu:
-        gpu_str = f"GPU: {gpu_info.gpu_type}"
         if gpu_info.gpu_model:
-            gpu_str += f" ({gpu_info.gpu_model})"
+            gpu_str = t("health_gpu_model", gpu=gpu_info.gpu_type, model=gpu_info.gpu_model)
+        else:
+            gpu_str = t("health_gpu", gpu=gpu_info.gpu_type)
         console.print(f"[green]✓[/green] {gpu_str}")
     else:
-        console.print("[dim]GPU: not detected[/dim]")
+        console.print(f"[dim]{t('health_gpu_none')}[/dim]")
 
     disk_info = get_home_disk_info()
     if disk_info:
         console.print(
-            f"[green]✓[/green] Disk: {disk_info.total_gb:.1f} GB "
-            f"(used: {disk_info.used_gb:.1f} GB, "
-            f"free: {disk_info.free_gb:.1f} GB, "
-            f"{disk_info.usage_percent:.1f}% used)"
+            "[green]✓[/green] "
+            + t(
+                "health_disk",
+                total=disk_info.total_gb,
+                used=disk_info.used_gb,
+                free=disk_info.free_gb,
+                pct=disk_info.usage_percent,
+            )
         )
 
     paths = PlatformPaths()
-    critical_paths = {
-        "Home directory": paths.home,
+    path_labels = {
+        "Home": paths.home,
         "Caches": paths.cache_dir(),
-        "Application Support": paths.app_support_dir(),
+        "App Support": paths.app_support_dir(),
         "Logs": paths.logs_dir(),
         ".ssh": paths.ssh_dir(),
     }
 
-    console.print("\n[bold]Path availability:[/bold]")
-    for name, path in critical_paths.items():
+    console.print(f"\n[bold]{t('health_paths')}[/bold]")
+    for name, path in path_labels.items():
         if path.exists():
-            console.print(f"[green]✓[/green] {name}: {path}")
+            console.print(f"[green]✓[/green] {t('health_path_ok', name=name, path=path)}")
         else:
-            console.print(f"[yellow]⚠[/yellow] {name}: {path} (not found)")
+            console.print(
+                f"[yellow]⚠[/yellow] {t('health_path_missing', name=name, path=path)}"
+            )
 
     project_dirs = paths.find_project_directories()
     if project_dirs:
-        console.print(f"\n[bold]Project directories ({len(project_dirs)}):[/bold]")
+        console.print(f"\n[bold]{t('health_projects', count=len(project_dirs))}[/bold]")
         for project_dir in project_dirs[:10]:
             console.print(f"[green]✓[/green] {project_dir}")
         if len(project_dirs) > 10:
-            console.print(f"[dim]... and {len(project_dirs) - 10} more[/dim]")
+            console.print(f"[dim]... +{len(project_dirs) - 10}[/dim]")
     else:
-        console.print("\n[yellow]⚠[/yellow] No project directories found")
-        console.print("[dim]Tool will search standard locations during scan[/dim]")
+        console.print(f"\n[yellow]⚠[/yellow] {t('health_no_projects')}")
+        console.print(f"[dim]{t('health_projects_hint')}[/dim]")
 
-    console.print("\n[bold]Configuration:[/bold]")
+    console.print(f"\n[bold]{t('health_config')}[/bold]")
     try:
         settings = load_config()
-        console.print("[green]✓[/green] Config loaded successfully")
-        console.print(f"  - Min size for report: {settings.scan.min_size_mb} MB")
-        console.print(f"  - Security check: {settings.scan.check_security}")
-        console.print(f"  - Project artifacts check: {settings.scan.check_project_artifacts}")
-        console.print(f"  - Dependencies check: {settings.scan.check_dependencies}")
-        console.print(f"  - ML cache check: {settings.scan.check_ml_cache}")
+        console.print(f"[green]✓[/green] {t('health_config_ok')}")
+        console.print(f"  - {t('health_min_size', mb=settings.scan.min_size_mb)}")
+        console.print(
+            f"  - {t('health_check_security', val=settings.scan.check_security)}"
+        )
+        console.print(
+            f"  - {t('health_check_projects', val=settings.scan.check_project_artifacts)}"
+        )
+        console.print(f"  - {t('health_check_deps', val=settings.scan.check_dependencies)}")
+        console.print(f"  - {t('health_check_ml', val=settings.scan.check_ml_cache)}")
     except Exception as e:
-        console.print(f"[red]✗[/red] Config load error: {e}")
+        console.print(f"[red]✗[/red] {t('health_config_fail', err=e)}")
 
-    console.print(f"\n[bold]System Cleaner v{__version__}[/bold]")
+    console.print(f"\n[bold]{t('health_version', version=__version__)}[/bold]")
 
 
 def main() -> None:
     """Application entry point."""
     set_locale(None)
+    configure_logging()
     app()
 
 

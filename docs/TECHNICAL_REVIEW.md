@@ -1,21 +1,19 @@
 # Technical review log
 
-## v1.1.0 (2026-05-29) — complete
+## v1.2.0 (2026-05-29) — Staff Max wave
 
-All items from the v1.0.1 / v1.1.0 finish plan are implemented:
+- Credibility: LOG_LEVEL/.env, full health i18n, PyPI badge (after publish)
+- Engineering: pytest-cov gate (50%+ measured core), bandit CI, 48 tests
+- Product: `--duplicates`, GitHub Action, MCP apply gated, plugin entry points
+- Docs: Homebrew formula example, workflow-sarif example
 
-- English-only `src/` with CI Cyrillic gate
-- i18n (`en` / `ru`), TUI and MCP optional extras
-- HF CLI cache enrichment, PyPI publish workflow
-- Branch protection documented, social preview asset
-- Legacy Russian changelog archived
+## Backlog (v1.3+)
 
-## Backlog (v1.2+)
-
-- Markdown report i18n (gettext)
-- Duplicate finder / app uninstaller
-- Homebrew tap
+- Markdown report full i18n (gettext)
+- App uninstaller
+- Homebrew tap (live)
 - GitHub Discussions
+- Coverage target 70%+ on full tree
 
 ## Quality gate
 

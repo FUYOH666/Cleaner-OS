@@ -2,6 +2,31 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.0] - 2026-05-29
+
+### Added
+
+- Duplicate file finder: `syscleaner scan --duplicates`
+- Recognizer plugin entry points (`syscleaner.recognizers`)
+- MCP `apply_plan_tool` with `allow_execute` gate
+- GitHub composite Action (`.github/actions/scan`) + `examples/workflow-sarif.yml`
+- Homebrew formula example (`docs/homebrew/syscleaner.rb`)
+- Coverage + Bandit in CI; 48+ tests with golden `tests/fixtures/scan_sample.json`
+
+### Changed
+
+- Full RU i18n for `health`; report headers localized via `SYSCLEANER_LANG`
+- `.env` wired: `LOG_LEVEL`, `SYSCLEANER_LANG` via pydantic-settings
+- Narrower exception handling in apply/registry/config
+- Reporter fix: no shadowing of i18n `t()`
+
+## [1.1.1] - 2026-05-29
+
+### Fixed
+
+- CI extras: `syscleaner --lang ru health` flag order
+- `SYSCLEANER_LANG` applied at CLI startup
+
 ## [1.1.0] - 2026-05-29
 
 ### Added
@@ -89,6 +114,8 @@ All notable changes to this project are documented in this file.
 
 Detailed notes for v0.2.x and v0.1.0 (Russian) are archived in [docs/history/CHANGELOG-legacy-ru.md](docs/history/CHANGELOG-legacy-ru.md).
 
+[1.2.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.1.0...v1.2.0
+[1.1.1]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v0.3.0...v1.0.0

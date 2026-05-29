@@ -1,0 +1,23 @@
+# Example: weekly audit + SARIF upload (no auto-delete)
+name: System Cleaner Audit
+
+on:
+  schedule:
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  audit:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/scan
+        with:
+          scan-args: "--all --security"
+          upload-sarif: "true"
+          sarif-path: results.sarif

@@ -13,6 +13,7 @@ from syscleaner.recognizers.builtin import (
     OrphanedAppSupportRecognizer,
     enrich_finding_cli_metadata,
 )
+from syscleaner.recognizers.plugins import load_plugin_recognizers
 
 logger = logging.getLogger(__name__)
 
@@ -44,24 +45,26 @@ def run_recognizers(
     enabled_ids = set(enabled or settings.recognizers.enabled or DEFAULT_ENABLED)
     findings: list[Finding] = []
 
-    for recognizer in BUILTIN_PATH_RECOGNIZERS:
+    all_recognizers = [*BUILTIN_PATH_RECOGNIZERS, *load_plugin_recognizers()]
+
+    for recognizer in all_recognizers:
         if recognizer.id not in enabled_ids:
             continue
         try:
             findings.extend(recognizer.scan(paths, settings))
-        except Exception as e:
+        except (OSError, PermissionError, ValueError) as e:
             logger.error("Recognizer %s failed: %s", recognizer.id, e)
 
     if "orphaned_app_support" in enabled_ids:
         try:
             findings.extend(OrphanedAppSupportRecognizer().scan(paths, settings))
-        except Exception as e:
+        except (OSError, PermissionError, ValueError) as e:
             logger.error("orphaned_app_support failed: %s", e)
 
     if legacy_caches:
         try:
             findings.extend(LegacyCacheRecognizer(legacy_caches).scan(paths, settings))
-        except Exception as e:
+        except (OSError, PermissionError, ValueError) as e:
             logger.error("legacy_cache failed: %s", e)
 
     return enrich_finding_cli_metadata(findings)

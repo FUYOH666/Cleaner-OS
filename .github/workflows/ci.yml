@@ -42,8 +42,11 @@ jobs:
       - name: Pyright
         run: uv run pyright
 
-      - name: Pytest
+      - name: Pytest with coverage
         run: uv run pytest -q
+
+      - name: Bandit
+        run: uv run bandit -r src/syscleaner -ll
 
       - name: CLI smoke test
         run: uv run syscleaner health

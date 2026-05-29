@@ -6,6 +6,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from syscleaner.i18n import t
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,22 +34,24 @@ def generate_markdown_report(
     """
     report_lines: list[str] = []
 
-    report_lines.append("# System Cleaner Audit Report\n")
-    report_lines.append(f"**Platform:** {platform}\n")
-    report_lines.append(f"**Scan date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+    report_lines.append(f"# {t('report_title')}\n")
+    report_lines.append(f"**{t('report_platform')}:** {platform}\n")
+    report_lines.append(
+        f"**{t('report_scan_date')}:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+    )
 
-    report_lines.append("## Summary\n")
+    report_lines.append(f"## {t('report_summary')}\n")
     total_size_mb = (
         sum(item["size_mb"] for item in scan_results.get("caches", []))
         + sum(item["size_mb"] for item in scan_results.get("orphaned_apps", []))
         + sum(item["size_mb"] for item in scan_results.get("hidden_files", []))
     )
     report_lines.append(
-        f"- **Total data size:** {total_size_mb:.2f} MB ({total_size_mb / 1024:.2f} GB)\n"
+        f"- **{t('report_total_size')}:** {total_size_mb:.2f} MB ({total_size_mb / 1024:.2f} GB)\n"
     )
 
     if ml_cache_results:
-        report_lines.append("## ML Model Caches\n")
+        report_lines.append(f"## {t('report_ml_caches')}\n")
         report_lines.append(f"- **Total models:** {ml_cache_results.get('total_models', 0)}\n")
         report_lines.append(
             f"- **Total size:** {ml_cache_results.get('total_size_gb', 0):.2f} GB\n"
@@ -146,8 +150,10 @@ def generate_markdown_report(
         report_lines.append("| Type | Count | Total Size |\n")
         report_lines.append("|-----|------------|--------------|\n")
         for artifact in scan_results["project_artifacts"]:
-            t, c, s = artifact["type"], artifact["count"], artifact["total_size_formatted"]
-            report_lines.append(f"| `{t}` | {c} | {s} |\n")
+            art_type = artifact["type"]
+            count = artifact["count"]
+            size_fmt = artifact["total_size_formatted"]
+            report_lines.append(f"| `{art_type}` | {count} | {size_fmt} |\n")
         report_lines.append("\n")
 
     if security_results.get("issues"):

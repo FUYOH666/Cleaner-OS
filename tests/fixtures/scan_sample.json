@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "platform": "test",
+  "created_at": "2026-05-29T00:00:00+00:00",
+  "findings": [
+    {
+      "id": "uv_cache:test",
+      "recognizer_id": "uv_cache",
+      "category": "python",
+      "title": "uv cache",
+      "path": "/tmp/uv",
+      "size_bytes": 1048576,
+      "risk": "safe",
+      "description": "",
+      "metadata": {"cli_available": true}
+    },
+    {
+      "id": "hf_hub:test",
+      "recognizer_id": "hf_hub",
+      "category": "ml",
+      "title": "Hugging Face hub",
+      "path": "/tmp/hf",
+      "size_bytes": 5242880,
+      "risk": "moderate",
+      "metadata": {}
+    }
+  ],
+  "security_issues": [
+    {
+      "path": "/home/user/.ssh/id_rsa",
+      "category": "ssh_permissions",
+      "severity": "high",
+      "description": "Private key permissions too open"
+    }
+  ],
+  "legacy": {}
+}
