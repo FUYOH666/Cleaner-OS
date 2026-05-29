@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from importlib.metadata import entry_points
-
 from typing import cast
 
 from syscleaner.recognizers.base import Recognizer
