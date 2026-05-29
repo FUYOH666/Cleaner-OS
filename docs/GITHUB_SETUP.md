@@ -8,7 +8,12 @@ gh api repos/FUYOH666/Cleaner-OS/branches/main/protection -X PUT \
 {
   "required_status_checks": {
     "strict": true,
-    "contexts": ["test"]
+    "contexts": [
+      "test (macos-latest, 3.12)",
+      "test (macos-latest, 3.13)",
+      "test (ubuntu-latest, 3.12)",
+      "test (ubuntu-latest, 3.13)"
+    ]
   },
   "enforce_admins": false,
   "required_pull_request_reviews": null,

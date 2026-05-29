@@ -9,6 +9,10 @@
 
 One scan surfaces caches, AI-era IDE junk, ML models, dependency issues, and security risks. You get structured reports and an optional **safe apply** path that prefers official tools (`uv`, `hf`, `brew`) over blind `rm`.
 
+### Status
+
+**v1.2.1** — feature-complete (maintenance mode). Install from source; PyPI coming soon — see [docs/PYPI_DEFERRED.md](docs/PYPI_DEFERRED.md) and [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md).
+
 ---
 
 ## Why this exists
@@ -41,11 +45,10 @@ uv run syscleaner apply --from-scan scan.json --dry-run
 Install:
 
 ```bash
-pip install syscleaner
-# or
-uv tool install syscleaner
-uv tool install git+https://github.com/FUYOH666/Cleaner-OS.git
-syscleaner health
+git clone https://github.com/FUYOH666/Cleaner-OS.git
+cd Cleaner-OS && uv sync
+uv run syscleaner health
+# PyPI (when published): pip install syscleaner
 ```
 
 Optional extras:

@@ -21,6 +21,11 @@ def test_sarif_structure() -> None:
     assert log["runs"][0]["results"][0]["level"] == "error"
 
 
+def test_sarif_empty_issues() -> None:
+    log = security_issues_to_sarif([], tool_version="1.2.1")
+    assert log["runs"][0]["results"] == []
+
+
 def test_export_sarif_from_bundle() -> None:
     bundle = ScanBundle(
         security_issues=[

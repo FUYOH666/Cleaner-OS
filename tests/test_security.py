@@ -19,3 +19,12 @@ def test_ssh_permissions_too_open(tmp_path: Path) -> None:
     issues = check_ssh_permissions(paths)
     assert len(issues) >= 1
     assert any("ssh" in i.category.lower() for i in issues)
+
+
+def test_scan_security_minimal(tmp_path: Path) -> None:
+    from syscleaner.analyzer.security import scan_security
+
+    paths = PlatformPaths(home=tmp_path)
+    result = scan_security(paths, check_ssh=False, check_permissions=False)
+    assert "issues" in result
+    assert result["high_severity_issues"] == 0

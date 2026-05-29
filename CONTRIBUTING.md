@@ -32,9 +32,9 @@ See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 6. Run linter (`uv run ruff check .`)
 7. Run type checker (`uv run pyright`)
 8. Ensure no Cyrillic in `src/`: `! rg '[А-Яа-яЁё]' src/`
-8. Commit your changes (`git commit -m 'Add amazing feature'`)
-9. Push to your branch (`git push origin feature/amazing-feature`)
-10. Open a Pull Request
+9. Commit your changes (`git commit -m 'Add amazing feature'`)
+10. Push to your branch (`git push origin feature/amazing-feature`)
+11. Open a Pull Request
 
 ## Development Setup
 

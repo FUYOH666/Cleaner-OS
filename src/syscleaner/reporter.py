@@ -86,7 +86,7 @@ def generate_markdown_report(
             report_lines.append("\n")
 
     if dependency_results:
-        report_lines.append("## Dependency Analysis\n")
+        report_lines.append(f"## {t('report_dependencies')}\n")
         report_lines.append(
             f"- **Projects checked:** {dependency_results.get('total_projects', 0)}\n"
         )
@@ -119,7 +119,7 @@ def generate_markdown_report(
             report_lines.append("\n")
 
     if scan_results.get("caches"):
-        report_lines.append("## Caches\n")
+        report_lines.append(f"## {t('report_caches')}\n")
         report_lines.append("| Path | Size |\n")
         report_lines.append("|------|--------|\n")
         for cache in scan_results["caches"][:20]:
@@ -127,7 +127,7 @@ def generate_markdown_report(
         report_lines.append("\n")
 
     if scan_results.get("orphaned_apps"):
-        report_lines.append("## Possible App Leftovers\n")
+        report_lines.append(f"## {t('report_orphaned_apps')}\n")
         report_lines.append("| Path | Size | Status |\n")
         report_lines.append("|------|--------|--------|\n")
         for app in scan_results["orphaned_apps"][:20]:
@@ -136,7 +136,7 @@ def generate_markdown_report(
         report_lines.append("\n")
 
     if scan_results.get("hidden_files"):
-        report_lines.append("## Large Hidden Files\n")
+        report_lines.append(f"## {t('report_hidden_files')}\n")
         report_lines.append("| Path | Type | Size |\n")
         report_lines.append("|------|-----|--------|\n")
         for hidden in scan_results["hidden_files"][:20]:
@@ -146,7 +146,7 @@ def generate_markdown_report(
         report_lines.append("\n")
 
     if scan_results.get("project_artifacts"):
-        report_lines.append("## Project Artifacts\n")
+        report_lines.append(f"## {t('report_project_artifacts')}\n")
         report_lines.append("| Type | Count | Total Size |\n")
         report_lines.append("|-----|------------|--------------|\n")
         for artifact in scan_results["project_artifacts"]:
@@ -157,7 +157,7 @@ def generate_markdown_report(
         report_lines.append("\n")
 
     if security_results.get("issues"):
-        report_lines.append("## Security Issues\n")
+        report_lines.append(f"## {t('report_security')}\n")
 
         high_issues = [i for i in security_results["issues"] if i.get("severity") == "high"]
         medium_issues = [i for i in security_results["issues"] if i.get("severity") == "medium"]
@@ -211,9 +211,9 @@ def generate_markdown_report(
             report_lines.append("\n")
 
     if cleanup_analysis.get("recommendations"):
-        report_lines.append("## Cleanup Recommendations\n")
+        report_lines.append(f"## {t('report_cleanup')}\n")
         report_lines.append(
-            f"**Potentially reclaimable:** {cleanup_analysis['total_reclaimable_gb']:.2f} GB\n\n",
+            f"**{t('report_reclaimable')}:** {cleanup_analysis['total_reclaimable_gb']:.2f} GB\n\n",
         )
         report_lines.append("| Type | Path | Size | Risk | Description |\n")
         report_lines.append("|-----|------|--------|------|----------|\n")

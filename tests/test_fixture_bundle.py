@@ -17,3 +17,27 @@ def test_fixture_loads_and_builds_plan() -> None:
     assert len(bundle.security_issues) == 1
     plan = build_plan_from_bundle(bundle)
     assert len(plan.actions) >= 1
+
+
+def test_load_legacy_scan_format() -> None:
+    legacy = {
+        "scan_results": {"caches": []},
+        "security_results": {
+            "issues": [
+                {
+                    "path": "/x",
+                    "category": "test",
+                    "severity": "low",
+                    "description": "d",
+                },
+            ],
+        },
+        "cleanup_analysis": {
+            "recommendations": [
+                {"type": "cache", "path": "/c", "size_mb": 1, "description": "x"},
+            ],
+        },
+    }
+    bundle = load_scan_bundle(legacy)
+    assert bundle.schema_version == "1.0"
+    assert len(bundle.security_issues) == 1

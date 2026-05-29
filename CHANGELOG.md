@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.1] - 2026-05-29
+
+### Added
+
+- TUI safe-tier execute with double confirmation (`execute_safe_plan`)
+- Report section headers i18n (EN/RU) for all major H2 blocks
+- 70 tests; coverage CI gate at 60% on measured core
+- [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md), [docs/PYPI_DEFERRED.md](docs/PYPI_DEFERRED.md)
+
+### Changed
+
+- PyPI classifier: **Beta** until package is published
+- Branch protection docs aligned with CI matrix check names
+
+### Project
+
+- **Feature-complete** for v1.2.x; maintenance mode (security fixes)
+
 ## [1.2.0] - 2026-05-29
 
 ### Added
@@ -114,6 +132,7 @@ All notable changes to this project are documented in this file.
 
 Detailed notes for v0.2.x and v0.1.0 (Russian) are archived in [docs/history/CHANGELOG-legacy-ru.md](docs/history/CHANGELOG-legacy-ru.md).
 
+[1.2.1]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.1.0...v1.2.0
 [1.1.1]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/FUYOH666/Cleaner-OS/compare/v1.0.1...v1.1.0

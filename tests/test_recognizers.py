@@ -21,3 +21,12 @@ def test_uv_cache_recognizer(tmp_path: Path) -> None:
     assert len(findings) == 1
     assert findings[0].recognizer_id == "uv_cache"
     assert findings[0].size_bytes >= 2048
+
+
+def test_legacy_cache_recognizer(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    paths = PlatformPaths(home=home)
+    settings = Settings()
+    legacy = [{"path": str(home / "cache"), "size_mb": 15.0, "name": "Legacy"}]
+    findings = run_recognizers(paths, settings, legacy_caches=legacy)
+    assert any(f.recognizer_id == "legacy_cache" for f in findings)

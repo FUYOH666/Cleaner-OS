@@ -38,3 +38,33 @@ def test_npm_cache_recognizer(tmp_path: Path) -> None:
     settings.recognizers.enabled = ["npm_cache"]
     findings = run_recognizers(paths, settings)
     assert any(f.recognizer_id == "npm_cache" for f in findings)
+
+
+def test_ollama_recognizer(tmp_path: Path) -> None:
+    _run_one(tmp_path, "ollama", ".ollama/models")
+
+
+def test_playwright_recognizer_macos(tmp_path: Path) -> None:
+    import sys
+
+    if sys.platform != "darwin":
+        return
+    _run_one(tmp_path, "playwright", "Library/Caches/ms-playwright")
+
+
+def test_pip_cache_recognizer(tmp_path: Path) -> None:
+    import sys
+
+    rel = "Library/Caches/pip" if sys.platform == "darwin" else ".cache/pip"
+    _run_one(tmp_path, "pip_cache", rel)
+
+
+def test_docker_cache_recognizer(tmp_path: Path) -> None:
+    import sys
+
+    rel = (
+        "Library/Containers/com.docker.docker/Data"
+        if sys.platform == "darwin"
+        else ".docker"
+    )
+    _run_one(tmp_path, "docker_cache", rel)
